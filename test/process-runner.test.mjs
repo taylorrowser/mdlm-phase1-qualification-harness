@@ -23,7 +23,7 @@ test('runner preserves separate raw streams, exit status, and empty argv', async
   }
 });
 
-test('deadline retains partial evidence, terminates the process group, and reaps descendants', async () => {
+test('deadline starts after readiness, retains evidence, and reaps descendants', async () => {
   const root = mkdtempSync(path.join(tmpdir(), 'phase1-deadline-'));
   try {
     const pidFile = path.join(root, 'pid');
@@ -35,14 +35,57 @@ test('deadline retains partial evidence, terminates the process group, and reaps
       const child = spawn(process.execPath, ['-e', "process.on('SIGTERM',()=>{});setInterval(()=>{},1000)"], { stdio: 'ignore' });
       writeFileSync(${JSON.stringify(pidFile)}, String(child.pid));
       process.stdout.write('partial\\n');
+      process._getActiveHandles();
+      writeFileSync(3, 'READY\\n');
       setInterval(() => {}, 1000);
     `);
-    const result = await runExact(process.execPath, [script], { deadlineMs: 150, termGraceMs: 100 });
+    const result = await runExact(process.execPath, [script], {
+      deadlineMs: 75,
+      readinessToken: 'READY\n',
+      readinessDeadlineMs: 1_000,
+      termGraceMs: 100,
+    });
+    assert.equal(result.ready, true);
     assert.equal(result.timedOut, true);
     assert.equal(result.termSent, true);
     assert.equal(result.killSent, true);
+    assert.equal(result.cleanupComplete, true);
     assert.equal(result.stdout.toString(), 'partial\n');
     assert.match(result.stderr.toString(), /term/);
+    const descendantPid = Number(readFileSync(pidFile, 'utf8'));
+    assert.throws(() => process.kill(descendantPid, 0), { code: 'ESRCH' });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('timeout returns with bounded streams after a detached descendant inherits its pipes', { skip: process.platform !== 'linux' }, async () => {
+  const root = mkdtempSync(path.join(tmpdir(), 'phase1-escaped-'));
+  try {
+    const pidFile = path.join(root, 'pid');
+    const script = path.join(root, 'escape.mjs');
+    writeFileSync(script, `
+      import { spawn } from 'node:child_process';
+      import { writeFileSync } from 'node:fs';
+      const child = spawn(process.execPath, ['-e', "require('node:fs').writeFileSync(3,'CHILD-READY\\\\n');process.on('SIGTERM',()=>{});process.stdout.write('x'.repeat(10000));setInterval(()=>{},1000)"],
+        { detached: true, stdio: ['ignore', process.stdout, process.stderr, 'pipe'] });
+      writeFileSync(${JSON.stringify(pidFile)}, String(child.pid));
+      child.stdio[3].once('data', () => writeFileSync(3, 'READY\\n'));
+      setInterval(() => {}, 1000);
+    `);
+    const started = Date.now();
+    const result = await runExact(process.execPath, [script], {
+      deadlineMs: 50,
+      readinessToken: 'READY\n',
+      readinessDeadlineMs: 1_000,
+      termGraceMs: 50,
+      maxOutputBytes: 128,
+    });
+    assert.ok(Date.now() - started < 2_000);
+    assert.equal(result.timedOut, true);
+    assert.equal(result.cleanupComplete, true);
+    assert.equal(result.stdout.length, 128);
+    assert.equal(result.stdoutTruncated, true);
     const descendantPid = Number(readFileSync(pidFile, 'utf8'));
     assert.throws(() => process.kill(descendantPid, 0), { code: 'ESRCH' });
   } finally {

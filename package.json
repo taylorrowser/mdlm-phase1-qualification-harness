@@ -7,8 +7,13 @@
     "mdlm-phase1-qualify": "bin/mdlm-phase1-qualify.mjs"
   },
   "scripts": {
-    "test": "node --test --test-concurrency=1",
-    "manifest": "node tools/generate-manifest.mjs"
+    "test": "\"$npm_node_execpath\" --test --test-concurrency=1",
+    "self-check": "\"$npm_node_execpath\" bin/mdlm-phase1-qualify.mjs self-check",
+    "qualify": "\"$npm_node_execpath\" bin/mdlm-phase1-qualify.mjs qualify",
+    "preflight": "\"$npm_node_execpath\" bin/mdlm-phase1-qualify.mjs preflight",
+    "pilot": "\"$npm_node_execpath\" bin/mdlm-phase1-qualify.mjs pilot",
+    "generate-preflight": "\"$npm_node_execpath\" tools/generate-preflight-inputs.mjs",
+    "manifest": "\"$npm_node_execpath\" tools/generate-manifest.mjs"
   },
   "engines": {
     "node": ">=24 <25"

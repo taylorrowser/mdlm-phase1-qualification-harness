@@ -4,7 +4,12 @@
   "repository": "https://github.com/taylorrowser/mdlm-temperature-pilot.git",
   "commit": "d4112f81394dc1f65812fee0b2d88ba73ee443ea",
   "tree": "233460fda1e5925e4d8beb86ed39d70f4c434b9b",
-  "entrypoint": { "executable": "node", "argv": ["cli.mjs"] },
+  "entrypoint": {
+    "runtime": "node",
+    "path": "cli.mjs",
+    "gitBlob": "848f0549e4ddbe2b7b1a4df3824d85c28c94fefc",
+    "sha256": "8713bec51304ac2d31f4a85cdb134ae7299e872ab14ed7c38dfbf09a9759e3ee"
+  },
   "deadlineMs": 2000,
   "cases": [
     { "id": "normal", "argv": ["0", "C", "F"], "expected": { "status": 0, "stdoutBase64": "MzIK", "stderrBase64": "" } },

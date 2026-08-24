@@ -7,8 +7,10 @@ import { fileURLToPath } from 'node:url';
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const configuration = JSON.parse(await readFile(path.join(root, 'config/qualification.json'), 'utf8'));
 const support = [
+  'lib/bindings.mjs',
   'lib/common.mjs',
   'lib/evidence.mjs',
+  'lib/git-objects.mjs',
   'lib/oracles.mjs',
   'lib/pilot.mjs',
   'lib/preflight.mjs',

@@ -18,6 +18,7 @@ test('qualification probes raw behavior and discriminates nonconforming fixtures
     assert.equal(result.status, 0, result.stderr);
     const evidence = JSON.parse(readFileSync(output, 'utf8'));
     assert.equal(evidence.pass, true);
+    assert.deepEqual(evidence.runtime, { executable: process.execPath, nodeVersion: process.versions.node });
     assert.equal(evidence.probes.find(({ id }) => id === 'raw-streams').observation.stdoutBase64, 'AP8=');
     assert.equal(evidence.negativeControls.every(({ discriminated }) => discriminated), true);
     assert.equal(evidence.cases.some(({ argv }) => argv.includes('')), true);

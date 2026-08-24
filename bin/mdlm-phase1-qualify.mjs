@@ -37,8 +37,16 @@ async function main(args) {
     return;
   }
   if (command === 'preflight') {
-    const options = parseOptions(rest, ['--env', '--vai']);
-    const result = await preflight(options['--env'], options['--vai']);
+    let environmentPath;
+    let vaiPath;
+    if (rest.length === 2 && rest[0] === '--proposal') {
+      environmentPath = rest[1];
+    } else {
+      const options = parseOptions(rest, ['--env', '--vai']);
+      environmentPath = options['--env'];
+      vaiPath = options['--vai'];
+    }
+    const result = await preflight(environmentPath, vaiPath);
     process.stdout.write(`${JSON.stringify(result)}\n`);
     return;
   }

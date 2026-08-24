@@ -4,7 +4,12 @@
   "repository": "https://github.com/taylorrowser/mdlm-calculator-pilot.git",
   "commit": "709497b329505a3c2a6f9d62abe2528099e14aaf",
   "tree": "b914b325eaa88441916a0d1b806e3cf11a3c804c",
-  "entrypoint": { "executable": "node", "argv": ["cli.mjs"] },
+  "entrypoint": {
+    "runtime": "node",
+    "path": "cli.mjs",
+    "gitBlob": "33864ab91539b57406f115c86072570a2e6ce886",
+    "sha256": "ffac00d2c090075a9857f3106cd33c32748dc675702a607545c443d845b3440b"
+  },
   "deadlineMs": 2000,
   "cases": [
     { "id": "normal", "argv": ["1", "+", "2"], "expected": { "status": 0, "stdoutBase64": "Mwo=", "stderrBase64": "" } },

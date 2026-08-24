@@ -28,8 +28,8 @@
     {
       "path": "bin/mdlm-phase1-qualify.mjs",
       "mode": "100755",
-      "gitBlob": "e75307a09018eab0c1f83cbdbb187045146dff99",
-      "sha256": "48e24e5012a6ca0e303c2405088407739b8a9181c832eb5671a61e6907d8a8c5"
+      "gitBlob": "0dfa8c5a770be1020e63207a6842537cd046c7f0",
+      "sha256": "3a5fe50ed61ba891f41932cbd7eea88ecad81dbefaf74e04a14c40fa2fd62052"
     },
     {
       "path": "config/qualification.json",
@@ -56,16 +56,28 @@
       "sha256": "46d5b6e6b2cf7adaab47a02c5804db50ae8f66ef3d21ed45034f387655a26b56"
     },
     {
+      "path": "lib/bindings.mjs",
+      "mode": "100644",
+      "gitBlob": "a5b2d227feedfd679cc55c153696032896c548bd",
+      "sha256": "57cc6364ce7db8f06d549213f283e8ecc392179ad130cb52e6889835fac13029"
+    },
+    {
       "path": "lib/common.mjs",
       "mode": "100644",
-      "gitBlob": "f045a5901c82f5251a0e7bd092e712e2438aaaa6",
-      "sha256": "465068d99be58554a1d94d0c54ab73fc0fe9d8a8a9eb24f28ecf4b4a5112db7a"
+      "gitBlob": "cdd6f46558ee5dbbefee803ad1eab43fb64f2c4c",
+      "sha256": "c78ff084258549762065d958a8df5b02bcce2f9c042cfa227f92612ec9556f0a"
     },
     {
       "path": "lib/evidence.mjs",
       "mode": "100644",
       "gitBlob": "9b20efaa5afd316a06a8e91aa1be85df8ce6d548",
       "sha256": "0f75c83d9ff52dafeaf078c78d9895831c06c8adde9574a7ee55cfb5d21ebf49"
+    },
+    {
+      "path": "lib/git-objects.mjs",
+      "mode": "100644",
+      "gitBlob": "bbf5d1b7b54ca559443ae2e5162b7b8bd138c637",
+      "sha256": "696ea681f0d596943254df2ad32b39714058fe2c7a5afaa190a9fa323c03b1f8"
     },
     {
       "path": "lib/oracles.mjs",
@@ -76,26 +88,26 @@
     {
       "path": "lib/pilot.mjs",
       "mode": "100644",
-      "gitBlob": "fcd024ce4a05ec8ecc160bfc66d687b3b57f2021",
-      "sha256": "bd2ee1e594971672c9932c0f396adf2f3d4f3ae48eb3219bb95c21807f122138"
+      "gitBlob": "8dcaa1195790932a018d897f3efac42c6eca5528",
+      "sha256": "a1f3e25612c818b12a5bad8bad189d537024749b7e9e6fd840108a0fc5969d44"
     },
     {
       "path": "lib/preflight.mjs",
       "mode": "100644",
-      "gitBlob": "a270adf8ce1f3a2a3174565c2f6c84cb0a7806ce",
-      "sha256": "45db29d3ed5f7ce318482c25cd267ab2193a65915f942e844b4dc748a94cb0b4"
+      "gitBlob": "c94143591e82735324894cc2777cfc182c9f0d89",
+      "sha256": "15bbb0c02a98b47ac3334cd5a4e2ef84c466e53c4f7bedc82e0db9c03c632a43"
     },
     {
       "path": "lib/process-runner.mjs",
       "mode": "100644",
-      "gitBlob": "7adf5e3fefa8e50e26542c3a749882592490778f",
-      "sha256": "fe077899f9410a9b05b62ba8364a6c94b910decf3240413f34cf1c1345dca62e"
+      "gitBlob": "fd24d11ca7bc30359787982e6998335b030e7010",
+      "sha256": "27db46861094b50ecd19c3662097bb4a9a4c34f56d836b462fdf2b9f3f24ce27"
     },
     {
       "path": "lib/qualify.mjs",
       "mode": "100644",
-      "gitBlob": "dc3b0f79939b80d1d0d29d32284689b51cc67aa7",
-      "sha256": "02f2fda33f514da26b1782adf2a97d7b0f05ee5a7e9357e854e720c1f45b4816"
+      "gitBlob": "f1e0505689e95330aafd07a6d9ba4896285ae91a",
+      "sha256": "8b5b629489f48b613af0a53bb71d2f212d06607411cd421c91d1c32f56a5fce0"
     },
     {
       "path": "probes/node24.mjs",
@@ -112,14 +124,14 @@
     {
       "path": "profiles/calculator.json",
       "mode": "100644",
-      "gitBlob": "35d69274db629d522a271ff6bd31036f349f9a1f",
-      "sha256": "bd69122a64df977caf5de0957284a1f4afa787c5d7175385bd5d22f885659ebf"
+      "gitBlob": "388f9d2132c44cc55159e34faae3367713ac7c56",
+      "sha256": "5425b6f14283632b44d3ece8bf24214df368646dd4374f083d3bd9565a7c15c3"
     },
     {
       "path": "profiles/temperature.json",
       "mode": "100644",
-      "gitBlob": "da789af06f05ecd1985f972a2dc004a4f648f3f7",
-      "sha256": "168d46b40f777c207ed0c6c7c39e89de9efd58455c9655b0b3536213acd1629d"
+      "gitBlob": "5b906f2526708f87a59be3d59a56e3735ed73b9e",
+      "sha256": "9cefa7c8b00d7c343ed1ed947a71d082aa109d24ae3aed1ac73df0bc6fcbd96c"
     }
   ]
 }
