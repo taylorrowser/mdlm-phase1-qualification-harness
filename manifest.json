@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "algorithm": {
+    "gitBlob": "sha1",
+    "rawBytes": "sha256"
+  },
+  "bindings": {
+    "runner": "bin/mdlm-phase1-qualify.mjs",
+    "configuration": "config/qualification.json",
+    "fixtures": [
+      "fixtures/calculator.mjs",
+      "fixtures/temperature.mjs",
+      "fixtures/nonconforming.mjs"
+    ],
+    "oracles": [
+      "lib/oracles.mjs"
+    ],
+    "probes": [
+      "probes/node24.mjs",
+      "probes/raw-streams.mjs"
+    ],
+    "profiles": [
+      "profiles/calculator.json",
+      "profiles/temperature.json"
+    ]
+  },
+  "assets": [
+    {
+      "path": "bin/mdlm-phase1-qualify.mjs",
+      "mode": "100755",
+      "gitBlob": "e75307a09018eab0c1f83cbdbb187045146dff99",
+      "sha256": "48e24e5012a6ca0e303c2405088407739b8a9181c832eb5671a61e6907d8a8c5"
+    },
+    {
+      "path": "config/qualification.json",
+      "mode": "100644",
+      "gitBlob": "f9d3becb1e0cea7411f363c83b6f015bbcc0f46b",
+      "sha256": "465762d12601b42a257253ccaa0f600595cbc7a5dfb2e93360ac1704406d445b"
+    },
+    {
+      "path": "fixtures/calculator.mjs",
+      "mode": "100755",
+      "gitBlob": "f36d0df94cfcbddf28cc40362cfb1a93267105df",
+      "sha256": "0bf654931f0097c4a1311212a5901d662e3f3141da296b518d23e236055efe04"
+    },
+    {
+      "path": "fixtures/nonconforming.mjs",
+      "mode": "100755",
+      "gitBlob": "257f4600fb256086ddf07e3511fed4331b5fffe6",
+      "sha256": "333fe4daf24a63cfa2ad1f246312f67a82a4745c5af4793a5181d1540d98c4df"
+    },
+    {
+      "path": "fixtures/temperature.mjs",
+      "mode": "100755",
+      "gitBlob": "2aa0968ed9fc2dc6c078114c6023b308131ab975",
+      "sha256": "46d5b6e6b2cf7adaab47a02c5804db50ae8f66ef3d21ed45034f387655a26b56"
+    },
+    {
+      "path": "lib/common.mjs",
+      "mode": "100644",
+      "gitBlob": "f045a5901c82f5251a0e7bd092e712e2438aaaa6",
+      "sha256": "465068d99be58554a1d94d0c54ab73fc0fe9d8a8a9eb24f28ecf4b4a5112db7a"
+    },
+    {
+      "path": "lib/evidence.mjs",
+      "mode": "100644",
+      "gitBlob": "9b20efaa5afd316a06a8e91aa1be85df8ce6d548",
+      "sha256": "0f75c83d9ff52dafeaf078c78d9895831c06c8adde9574a7ee55cfb5d21ebf49"
+    },
+    {
+      "path": "lib/oracles.mjs",
+      "mode": "100644",
+      "gitBlob": "94ebd1e903dc84ae09982e2d74f5f4555411df9a",
+      "sha256": "b3a589890e087ea2eda791a1c97b91c5979a2cf8cfc89f3e991452520feb962e"
+    },
+    {
+      "path": "lib/pilot.mjs",
+      "mode": "100644",
+      "gitBlob": "fcd024ce4a05ec8ecc160bfc66d687b3b57f2021",
+      "sha256": "bd2ee1e594971672c9932c0f396adf2f3d4f3ae48eb3219bb95c21807f122138"
+    },
+    {
+      "path": "lib/preflight.mjs",
+      "mode": "100644",
+      "gitBlob": "a270adf8ce1f3a2a3174565c2f6c84cb0a7806ce",
+      "sha256": "45db29d3ed5f7ce318482c25cd267ab2193a65915f942e844b4dc748a94cb0b4"
+    },
+    {
+      "path": "lib/process-runner.mjs",
+      "mode": "100644",
+      "gitBlob": "7adf5e3fefa8e50e26542c3a749882592490778f",
+      "sha256": "fe077899f9410a9b05b62ba8364a6c94b910decf3240413f34cf1c1345dca62e"
+    },
+    {
+      "path": "lib/qualify.mjs",
+      "mode": "100644",
+      "gitBlob": "dc3b0f79939b80d1d0d29d32284689b51cc67aa7",
+      "sha256": "02f2fda33f514da26b1782adf2a97d7b0f05ee5a7e9357e854e720c1f45b4816"
+    },
+    {
+      "path": "probes/node24.mjs",
+      "mode": "100755",
+      "gitBlob": "6c4957696500221e35932b8afc486780ae1c2597",
+      "sha256": "243cbf0ae3cc0bb97b990c33b6a599e87bdf3a6e9c4827272de27b0467dff8aa"
+    },
+    {
+      "path": "probes/raw-streams.mjs",
+      "mode": "100755",
+      "gitBlob": "4a75abb6217d3aa0f77be2a076840d563efdee63",
+      "sha256": "d53d8cec5e931273ca3fb6477fd6488c4a1edb0967e12096c323aac76d436cbe"
+    },
+    {
+      "path": "profiles/calculator.json",
+      "mode": "100644",
+      "gitBlob": "35d69274db629d522a271ff6bd31036f349f9a1f",
+      "sha256": "bd69122a64df977caf5de0957284a1f4afa787c5d7175385bd5d22f885659ebf"
+    },
+    {
+      "path": "profiles/temperature.json",
+      "mode": "100644",
+      "gitBlob": "da789af06f05ecd1985f972a2dc004a4f648f3f7",
+      "sha256": "168d46b40f777c207ed0c6c7c39e89de9efd58455c9655b0b3536213acd1629d"
+    }
+  ]
+}

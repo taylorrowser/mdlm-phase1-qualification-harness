@@ -1,0 +1,17 @@
+{
+  "name": "@mdlm/phase1-qualification-harness",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "bin": {
+    "mdlm-phase1-qualify": "bin/mdlm-phase1-qualify.mjs"
+  },
+  "scripts": {
+    "test": "node --test --test-concurrency=1",
+    "manifest": "node tools/generate-manifest.mjs"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "license": "MIT"
+}

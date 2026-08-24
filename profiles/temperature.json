@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "temperature-cli-bootstrap",
+  "repository": "https://github.com/taylorrowser/mdlm-temperature-pilot.git",
+  "commit": "d4112f81394dc1f65812fee0b2d88ba73ee443ea",
+  "tree": "233460fda1e5925e4d8beb86ed39d70f4c434b9b",
+  "entrypoint": { "executable": "node", "argv": ["cli.mjs"] },
+  "deadlineMs": 2000,
+  "cases": [
+    { "id": "normal", "argv": ["0", "C", "F"], "expected": { "status": 0, "stdoutBase64": "MzIK", "stderrBase64": "" } },
+    { "id": "raw-malformed", "argv": ["NaN", "C", "F"], "expected": { "status": 2, "stdoutBase64": "", "stderrBase64": "aW52YWxpZCBpbnB1dAo=" } },
+    { "id": "omitted", "argv": ["0", "C"], "expected": { "status": 2, "stdoutBase64": "", "stderrBase64": "aW52YWxpZCBpbnB1dAo=" } },
+    { "id": "extra", "argv": ["0", "C", "F", "extra"], "expected": { "status": 2, "stdoutBase64": "", "stderrBase64": "aW52YWxpZCBpbnB1dAo=" } }
+  ]
+}
