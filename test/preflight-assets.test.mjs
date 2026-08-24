@@ -161,9 +161,17 @@ function withFixture(options, callback) {
 test('preflight accepts an actual scenario proposal and materializes verified blobs without ambient filters', () => {
   withFixture({}, (fixture, scratch) => {
     const hostile = path.join(fixture.root, 'hostile.gitconfig');
+    const markerLog = path.join(fixture.root, 'node-options.log');
+    const marker = path.join(fixture.root, 'marker.cjs');
     writeFileSync(hostile, '[filter "poison"]\n\tsmudge = sh -c "printf poisoned"\n[core]\n\thooksPath = /tmp/hostile-hooks\n');
-    const result = invoke(fixture, scratch, undefined, { GIT_CONFIG_GLOBAL: hostile, GIT_TEMPLATE_DIR: '/tmp/hostile-template' });
+    writeFileSync(marker, `require('node:fs').appendFileSync(${JSON.stringify(markerLog)}, String(process.pid) + '\\n');\n`);
+    const result = invoke(fixture, scratch, undefined, {
+      GIT_CONFIG_GLOBAL: hostile,
+      GIT_TEMPLATE_DIR: '/tmp/hostile-template',
+      NODE_OPTIONS: `--require=${marker}`,
+    });
     assert.equal(result.status, 0, result.stderr);
+    assert.equal(readFileSync(markerLog, 'utf8').trim().split('\n').length, 1, 'NODE_OPTIONS preload reached the preflight self-check child');
     const evidence = JSON.parse(result.stdout);
     assert.equal(evidence.ok, true);
     assert.equal(evidence.runtime.executable, process.execPath);

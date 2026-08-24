@@ -13,18 +13,22 @@ The harness uses Node's standard library and Git. Child-process observations ret
 - Git at `/usr/bin/git`
 - Linux for process-group and `/proc` descendant cleanup checks
 
-## Commands
-
-Run the local integrity check:
+The npm process is the trusted launch boundary. Remove `NODE_OPTIONS` before starting npm so a preload cannot run in npm or the harness process. An already-running Node process cannot undo code loaded through its own startup options. The supported sanitized form is:
 
 ```sh
-npm run self-check
+env -u NODE_OPTIONS npm run self-check
 ```
+
+Every npm script clears `NODE_OPTIONS` again before it starts the trusted Node executable. The process runner uses `process.execPath` and gives qualification fixtures, pilot products, and preflight self-checks a minimal platform environment instead of ambient Node startup options.
+
+## Commands
+
+Run the local integrity check with the sanitized launch form above.
 
 Qualify the synthetic environment:
 
 ```sh
-npm run qualify -- \
+env -u NODE_OPTIONS npm run qualify -- \
   --config config/qualification.json \
   --output /tmp/qualification-evidence.json
 ```
@@ -32,13 +36,13 @@ npm run qualify -- \
 Generate a `realize-verification-environment@1` assignment response after the harness commit is public and immutable. The strategy file must contain one exact VSP datum with `revision_id` and `payload.environment_profile`:
 
 ```sh
-npm run generate-preflight -- \
+env -u NODE_OPTIONS npm run generate-preflight -- \
   --repository https://github.com/taylorrowser/mdlm-phase1-qualification-harness.git \
   --commit <exact-40-hex-commit> \
   --assignment <assignment-uuid> \
   --strategy /tmp/exact-vsp.json \
   --output /tmp/realize-environment-response.json
-npm run preflight -- \
+env -u NODE_OPTIONS npm run preflight -- \
   --proposal /tmp/realize-environment-response.json
 ```
 
@@ -47,7 +51,7 @@ The generated JSON is the scenario response, not a parallel claim. Its ENV paylo
 Preflight also accepts exact schema-compatible payload documents:
 
 ```sh
-npm run preflight -- --env /tmp/env.json --vai /tmp/vai.json
+env -u NODE_OPTIONS npm run preflight -- --env /tmp/env.json --vai /tmp/vai.json
 ```
 
 Preflight fetches into a new bare object store with system and global Git configuration disabled. It does not checkout files. It rejects `.lifecycle/`, symlinks, submodules, non-regular entries, path escapes, and object or digest disagreement. It reads exact Git blobs, verifies their manifest Git object IDs and raw SHA-256 values, then materializes only verified bytes in a process-owned temporary directory. The runner executes through `process.execPath`. Success requires the exact structured self-check value, empty stderr, bounded output, and complete reported cleanup.
@@ -55,13 +59,13 @@ Preflight fetches into a new bare object store with system and global Git config
 Run the public pilot profiles:
 
 ```sh
-npm run pilot -- \
+env -u NODE_OPTIONS npm run pilot -- \
   --profile profiles/calculator.json \
   --repository https://github.com/taylorrowser/mdlm-calculator-pilot.git \
   --commit 709497b329505a3c2a6f9d62abe2528099e14aaf \
   --output /tmp/calculator-pilot.json
 
-npm run pilot -- \
+env -u NODE_OPTIONS npm run pilot -- \
   --profile profiles/temperature.json \
   --repository https://github.com/taylorrowser/mdlm-temperature-pilot.git \
   --commit d4112f81394dc1f65812fee0b2d88ba73ee443ea \
@@ -81,7 +85,7 @@ Each profile fixes the repository, commit, tree, public entrypoint path, entrypo
 After changing a bound or runtime file, run:
 
 ```sh
-npm run manifest
+env -u NODE_OPTIONS npm run manifest
 ```
 
 `tools/generate-manifest.mjs` computes each Git blob ID from `blob <length>\0<bytes>` and SHA-256 from the raw bytes. `manifest.json` cannot contain its own digest. The generated scenario response binds the manifest path, Git blob, and SHA-256 observed at the exact commit.
@@ -89,7 +93,7 @@ npm run manifest
 ## Tests
 
 ```sh
-npm test
+env -u NODE_OPTIONS npm test
 ```
 
 The pilot tests require network access to the two public repositories. The suite runs serially for the four-core development host.

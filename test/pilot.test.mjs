@@ -18,10 +18,14 @@ for (const [name, repository, commit] of targets) {
     const temporary = mkdtempSync(path.join(tmpdir(), `phase1-pilot-${name}-`));
     try {
       const output = path.join(temporary, 'evidence.json');
+      const markerLog = path.join(temporary, 'node-options.log');
+      const marker = path.join(temporary, 'marker.cjs');
+      writeFileSync(marker, `require('node:fs').appendFileSync(${JSON.stringify(markerLog)}, String(process.pid) + '\\n');\n`);
       const result = spawnSync(process.execPath, [cli, 'pilot', '--profile', path.join(root, `profiles/${name}.json`), '--repository', repository, '--commit', commit, '--output', output], {
-        encoding: 'utf8', timeout: 15_000,
+        encoding: 'utf8', timeout: 15_000, env: { ...process.env, NODE_OPTIONS: `--require=${marker}` },
       });
       assert.equal(result.status, 0, result.stderr);
+      assert.equal(readFileSync(markerLog, 'utf8').trim().split('\n').length, 1, `NODE_OPTIONS preload reached a ${name} pilot child`);
       const evidence = JSON.parse(readFileSync(output, 'utf8'));
       assert.equal(evidence.pass, true);
       assert.equal(evidence.commit, commit);

@@ -3,7 +3,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'no
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { runCases, runExact } from '../lib/process-runner.mjs';
+import { nodeChildEnvironment, runCases, runExact } from '../lib/process-runner.mjs';
 
 test('runner preserves separate raw streams, exit status, and empty argv', async () => {
   const root = mkdtempSync(path.join(tmpdir(), 'phase1-raw-'));
@@ -21,6 +21,24 @@ test('runner preserves separate raw streams, exit status, and empty argv', async
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+test('runner gives Node children only required platform variables', async () => {
+  const result = await runExact(process.execPath, ['-e', 'process.stdout.write(JSON.stringify(process.env))'], {
+    deadlineMs: 1_000,
+  });
+  assert.equal(result.status, 0);
+  assert.deepEqual(JSON.parse(result.stdout.toString('utf8')), nodeChildEnvironment());
+  assert.equal(Object.hasOwn(JSON.parse(result.stdout.toString('utf8')), 'NODE_OPTIONS'), false);
+});
+
+test('runner strips NODE_OPTIONS from an explicit child environment', async () => {
+  const result = await runExact(process.execPath, ['-e', "process.stdout.write(process.env.SENTINEL + ':' + String(process.env.NODE_OPTIONS))"], {
+    deadlineMs: 1_000,
+    env: { SENTINEL: 'retained', NODE_OPTIONS: '--require=/does/not/exist' },
+  });
+  assert.equal(result.status, 0, result.stderr.toString('utf8'));
+  assert.equal(result.stdout.toString('utf8'), 'retained:undefined');
 });
 
 test('deadline starts after readiness, retains evidence, and reaps descendants', async () => {
