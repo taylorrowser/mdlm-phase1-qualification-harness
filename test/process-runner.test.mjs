@@ -112,6 +112,52 @@ test('timeout returns with bounded streams after a detached descendant inherits 
   }
 });
 
+test('runner drains stdout and stderr emitted after exit before returning complete evidence', async () => {
+  const root = mkdtempSync(path.join(tmpdir(), 'phase1-trailing-streams-'));
+  try {
+    const descendant = path.join(root, 'descendant.mjs');
+    const parent = path.join(root, 'parent.mjs');
+    writeFileSync(descendant, [
+      "import { writeSync } from 'node:fs';",
+      "setTimeout(() => { writeSync(1, 'stdout-after-exit\\n'); writeSync(2, 'stderr-after-exit\\n'); }, 25);",
+    ].join('\n'));
+    writeFileSync(parent, [
+      "import { spawn } from 'node:child_process';",
+      "import { writeSync } from 'node:fs';",
+      "writeSync(1, 'stdout-before-exit\\n'); writeSync(2, 'stderr-before-exit\\n');",
+      `spawn(process.execPath, [${JSON.stringify(descendant)}], { stdio: ['ignore', process.stdout, process.stderr] });`,
+      'process.exit(0);',
+    ].join('\n'));
+    const result = await runExact(process.execPath, [parent], {
+      deadlineMs: 1_000,
+      termGraceMs: 50,
+      streamDrainMs: 250,
+    });
+    assert.equal(result.status, 0);
+    assert.equal(result.stdout.toString(), 'stdout-before-exit\nstdout-after-exit\n');
+    assert.equal(result.stderr.toString(), 'stderr-before-exit\nstderr-after-exit\n');
+    assert.deepEqual(result.streams, {
+      childClose: true,
+      stdoutEnded: true,
+      stderrEnded: true,
+      complete: true,
+    });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('runner retains trailing bytes written in the child exit handler', async () => {
+  const result = await runExact(process.execPath, ['-e', [
+    "const { writeSync } = require('node:fs');",
+    "writeSync(1, 'stdout-main\\n'); writeSync(2, 'stderr-main\\n');",
+    "process.on('exit', () => { writeSync(1, 'stdout-close\\n'); writeSync(2, 'stderr-close\\n'); });",
+  ].join('')], { deadlineMs: 1_000, termGraceMs: 50 });
+  assert.equal(result.stdout.toString(), 'stdout-main\nstdout-close\n');
+  assert.equal(result.stderr.toString(), 'stderr-main\nstderr-close\n');
+  assert.equal(result.streams.complete, true);
+});
+
 test('runner aggregates every case after failures', async () => {
   const cases = [
     { id: 'fail', executable: process.execPath, argv: ['-e', 'process.exit(3)'] },

@@ -11,6 +11,7 @@ const support = [
   'lib/common.mjs',
   'lib/controlled-execution.mjs',
   'lib/evidence.mjs',
+  'lib/execution-identity.mjs',
   'lib/git-objects.mjs',
   'lib/oracles.mjs',
   'lib/pilot.mjs',

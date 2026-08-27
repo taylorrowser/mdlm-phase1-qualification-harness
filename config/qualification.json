@@ -2,7 +2,10 @@
   "schemaVersion": 1,
   "assetRoot": "..",
   "capabilities": {
-    "provided": ["controlled-execution@1", "execution-profile@1"],
+    "candidates": [
+      { "id": "controlled-execution@1", "qualificationStatus": "not-qualified" },
+      { "id": "execution-profile@1", "qualificationStatus": "not-qualified" }
+    ],
     "unsupported": [
       "filesystem-trace@1",
       "filesystem-fault-injection@1",
@@ -18,7 +21,7 @@
     "fixtures": ["fixtures/calculator.mjs", "fixtures/temperature.mjs", "fixtures/nonconforming.mjs"],
     "oracles": ["lib/oracles.mjs"],
     "probes": ["probes/node24.mjs", "probes/raw-streams.mjs"],
-    "profiles": ["profiles/calculator.json", "profiles/temperature.json"]
+    "profiles": ["profiles/calculator.json", "profiles/temperature.json", "profiles/controlled-calculator-candidate.json"]
   },
   "deadlineMs": 2000,
   "termGraceMs": 100,

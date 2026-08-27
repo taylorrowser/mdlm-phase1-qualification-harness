@@ -5,9 +5,15 @@
     "rawBytes": "sha256"
   },
   "capabilities": {
-    "provided": [
-      "controlled-execution@1",
-      "execution-profile@1"
+    "candidates": [
+      {
+        "id": "controlled-execution@1",
+        "qualificationStatus": "not-qualified"
+      },
+      {
+        "id": "execution-profile@1",
+        "qualificationStatus": "not-qualified"
+      }
     ],
     "unsupported": [
       "filesystem-trace@1",
@@ -35,7 +41,8 @@
     ],
     "profiles": [
       "profiles/calculator.json",
-      "profiles/temperature.json"
+      "profiles/temperature.json",
+      "profiles/controlled-calculator-candidate.json"
     ]
   },
   "assets": [
@@ -48,8 +55,8 @@
     {
       "path": "config/qualification.json",
       "mode": "100644",
-      "gitBlob": "cb6c3b331ba7d7a6f1ea0f072d65c1e222b5c21b",
-      "sha256": "b4c597368895728c3305ea721f97ba0a73487de0d2489d9b5e017cc05496fb18"
+      "gitBlob": "fa466057d6c72ec0c9c48c067cf82ae085355a0d",
+      "sha256": "1c35eda438bb43242a9fc503ff8abaf8020c85bb13e844e2cb37075b675b79d3"
     },
     {
       "path": "fixtures/calculator.mjs",
@@ -84,8 +91,8 @@
     {
       "path": "lib/controlled-execution.mjs",
       "mode": "100644",
-      "gitBlob": "172209c94c1c57361e00d820c8bbccc781e84cc7",
-      "sha256": "591882170be3e317ecd5301d45b5a725980155e5fdd3e9e6103a3aee2c80da27"
+      "gitBlob": "6c1133bcb0d61cefe758a3462baacb53b92f4172",
+      "sha256": "8af88960e094a0ec5319f3b1c65afa4d2d63889664642a56d6abaa8d31000878"
     },
     {
       "path": "lib/evidence.mjs",
@@ -94,10 +101,16 @@
       "sha256": "6605993710ff7449bd09a5bb0ffabbea27cf3fea8767d2f760901ad3aa842bf6"
     },
     {
+      "path": "lib/execution-identity.mjs",
+      "mode": "100644",
+      "gitBlob": "f2481405c451936c279c97a3c511ffd7278126b4",
+      "sha256": "bb0fc2d6cf9e41c14973c68ce8a1d03fa77ea2adb763e8ea29bb7f7c54551a74"
+    },
+    {
       "path": "lib/git-objects.mjs",
       "mode": "100644",
-      "gitBlob": "bbf5d1b7b54ca559443ae2e5162b7b8bd138c637",
-      "sha256": "696ea681f0d596943254df2ad32b39714058fe2c7a5afaa190a9fa323c03b1f8"
+      "gitBlob": "05fb70c8fa2278f9c29ee499be6c4a7112cc5458",
+      "sha256": "e97fc30441282708b28b9fb4bceef437dd5ff39219acd696b60b14d91a9cd7e9"
     },
     {
       "path": "lib/oracles.mjs",
@@ -108,26 +121,26 @@
     {
       "path": "lib/pilot.mjs",
       "mode": "100644",
-      "gitBlob": "946916c0c950a39b528ecf0d92a6a5c52c31af1a",
-      "sha256": "fec331829ce1e5962305320ed94a9145af9578c875731dca3e6c44526ecdc586"
+      "gitBlob": "0b8e6116c72bd34a313fa22da23dd1d6ef62d661",
+      "sha256": "deefac2d065f04c038dd3ea6d73fdeee03c9e66f0ca0e6e54af0cd0fbf9b6e12"
     },
     {
       "path": "lib/preflight.mjs",
       "mode": "100644",
-      "gitBlob": "e76e65a3a3ff143898a15798a8ca38feba0ffbcc",
-      "sha256": "e58e6a7751507af8a3e513270699738e5693f84882fabb72bf71a32dd2122abb"
+      "gitBlob": "b6e3a56134d9785bf51a2153f0e5e8f6fe30fa4f",
+      "sha256": "3f6a3561a71230f0a1f880c50f3e2e0c592309ce9c3796c9601c33ceee77bc54"
     },
     {
       "path": "lib/process-runner.mjs",
       "mode": "100644",
-      "gitBlob": "399674631c9dafecf7887a975ab431ed8bf4e508",
-      "sha256": "44f3a401896c84c997c546db2e524faa1977fd4df7b228b6b5767825454879b7"
+      "gitBlob": "db6edcec5a4ff9e7b915dd751222464e7c323a99",
+      "sha256": "0f6bfe0e0f8f16540fdc904603c0959b0f9317114b33bab8a6b46aafeb19905e"
     },
     {
       "path": "lib/qualify.mjs",
       "mode": "100644",
-      "gitBlob": "5508f0de732ae3cf17e07bdbc84513da29b5875b",
-      "sha256": "24b40b3f90af03868a76211d97095d73bb0b2806e76214e7b490e052c3126718"
+      "gitBlob": "ad7cce5684a6d8a61e319c3f6713f02d675ea5e8",
+      "sha256": "3708ac861364fd70715001ce3d8cf893dca6a04b3af61391a5816371f34c9c2b"
     },
     {
       "path": "probes/node24.mjs",
@@ -146,6 +159,12 @@
       "mode": "100644",
       "gitBlob": "388f9d2132c44cc55159e34faae3367713ac7c56",
       "sha256": "5425b6f14283632b44d3ece8bf24214df368646dd4374f083d3bd9565a7c15c3"
+    },
+    {
+      "path": "profiles/controlled-calculator-candidate.json",
+      "mode": "100644",
+      "gitBlob": "dcc3075ec501ddf686542b9dac455eec4c8a2cb7",
+      "sha256": "3fcaa0cd31ddf4eeef221f378aaf02f9a5f146d507dba76608f2b5208a28ca54"
     },
     {
       "path": "profiles/temperature.json",

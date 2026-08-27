@@ -74,17 +74,9 @@ function runLocalPilot(target, { id, argv, expected, controlled = false }) {
       deadlineMs: 1_000,
       ...(controlled ? {
         capabilities: { required: ['controlled-execution@1', 'execution-profile@1'] },
-        identities: {
-          runner: {
-            id: 'mdlm-phase1-qualification-harness',
-            commit: 'a'.repeat(40),
-            tree: 'b'.repeat(40),
-            executable: process.execPath,
-          },
-          adapter: { id: 'run-exact@2' },
-        },
         executionProfile: {
           schemaVersion: 1,
+          id: `${id}-controlled-profile`,
           environment: { LANG: 'C.UTF-8', LC_ALL: 'C.UTF-8', TZ: 'UTC', variables: {} },
           limits: {
             deadlineMs: 1_000,
@@ -93,6 +85,7 @@ function runLocalPilot(target, { id, argv, expected, controlled = false }) {
             maxFixtureBytes: 1024,
             maxAggregateFixtureBytes: 2048,
             maxStdinBytes: 1024,
+            maxOutputBytes: 1024,
           },
         },
       } : {}),
@@ -185,6 +178,30 @@ test('pilot consumes an explicit controlled execution profile through capability
     assert.equal(evidence.cases[0].controlled.workspace.cleaned, true);
   } finally {
     rmSync(target.repository, { recursive: true, force: true });
+  }
+});
+
+test('pilot routes the committed controlled candidate profile through executeControlledCase', { timeout: 20_000 }, () => {
+  const temporary = mkdtempSync(path.join(tmpdir(), 'phase1-pilot-committed-controlled-'));
+  try {
+    const output = path.join(temporary, 'evidence.json');
+    const profile = JSON.parse(readFileSync(path.join(root, 'profiles/controlled-calculator-candidate.json'), 'utf8'));
+    const result = spawnSync(process.execPath, [
+      cli, 'pilot',
+      '--profile', path.join(root, 'profiles/controlled-calculator-candidate.json'),
+      '--repository', profile.repository,
+      '--commit', profile.commit,
+      '--output', output,
+    ], { encoding: 'utf8', timeout: 15_000 });
+    assert.equal(result.status, 0, result.stderr);
+    const evidence = JSON.parse(readFileSync(output, 'utf8'));
+    assert.equal(evidence.pass, true);
+    assert.equal(evidence.qualificationStatus, 'candidate-not-qualified');
+    assert.equal(evidence.cases.length, 4);
+    assert.equal(evidence.cases.every((entry) => entry.controlled.complete), true);
+    assert.equal(evidence.cases.every((entry) => entry.controlled.identities.profile.id === 'controlled-execution-candidate-v1'), true);
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
   }
 });
 

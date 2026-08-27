@@ -1,17 +1,28 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import test from 'node:test';
+import test, { after } from 'node:test';
 import { executeControlledCase } from '../lib/controlled-execution.mjs';
 
 const root = path.resolve('.');
 const targetBytes = readFileSync(path.join(root, 'test/fixtures/controlled-target.mjs'));
 const fixtureBytes = Buffer.from([0x00, 0xff, 0x0a, 0x0d, 0x41]);
-const harnessCommit = '623bba1c1cf13a7460862dc398b4cae38e0ed907';
-const harnessTree = '0f70fce58a25840c18fe802213fd601c18539428';
+const targetRepository = mkdtempSync(path.join(tmpdir(), 'phase1-controlled-target-repository-'));
+const git = (...args) => execFileSync('/usr/bin/git', args, { cwd: targetRepository, encoding: 'utf8' }).trim();
+git('init', '-q');
+git('config', 'user.name', 'Test');
+git('config', 'user.email', 'test@example.invalid');
+mkdirSync(path.join(targetRepository, 'target'));
+writeFileSync(path.join(targetRepository, 'target/controlled-target.mjs'), targetBytes, { mode: 0o755 });
+git('add', 'target/controlled-target.mjs');
+git('commit', '-qm', 'controlled target');
+const targetCommit = git('rev-parse', 'HEAD');
+const targetTree = git('rev-parse', 'HEAD^{tree}');
+const targetBlob = git('rev-parse', `${targetCommit}:target/controlled-target.mjs`);
+after(() => rmSync(targetRepository, { recursive: true, force: true }));
 
 function digest(bytes) {
   return createHash('sha256').update(bytes).digest('hex');
@@ -22,35 +33,24 @@ function encoded(bytes) {
 }
 
 function requestFor(temporary, overrides = {}) {
-  const identities = {
+  return {
+    schemaVersion: 1,
+    capabilities: { required: ['controlled-execution@1', 'execution-profile@1'] },
     target: {
-      repository: 'https://example.invalid/exact-target.git',
-      commit: '1'.repeat(40),
-      tree: '2'.repeat(40),
+      repository: targetRepository,
+      commit: targetCommit,
+      tree: targetTree,
       entrypoint: {
         path: 'target/controlled-target.mjs',
         runtime: 'node',
         gitMode: '100755',
-        gitBlob: '3'.repeat(40),
+        gitBlob: targetBlob,
         sha256: digest(targetBytes),
       },
     },
-    runner: {
-      id: 'mdlm-phase1-qualification-harness',
-      commit: harnessCommit,
-      tree: harnessTree,
-      executable: process.execPath,
-    },
-    adapter: { id: 'run-exact@2' },
-    profile: { id: 'controlled-case-test-profile', sha256: '4'.repeat(64) },
-  };
-
-  return {
-    schemaVersion: 1,
-    capabilities: { required: ['controlled-execution@1', 'execution-profile@1'] },
-    identities,
     executionProfile: {
       schemaVersion: 1,
+      id: 'controlled-case-test-profile',
       entrypoint: {
         runtime: 'node',
         path: 'target/controlled-target.mjs',
@@ -73,6 +73,7 @@ function requestFor(temporary, overrides = {}) {
         maxFixtureBytes: 1024,
         maxAggregateFixtureBytes: 1200,
         maxStdinBytes: 2 * 1024 * 1024,
+        maxOutputBytes: 1024 * 1024,
       },
     },
     case: {
@@ -92,6 +93,18 @@ function assertWorkspaceCleaned(result) {
   assert.equal(result.workspace.cleaned, true);
   assert.equal(existsSync(result.workspace.path), false);
   assert.equal(result.cleanup.complete, true);
+}
+
+function assertDerivedIdentities(result) {
+  assert.equal(result.identities.target.commit, targetCommit);
+  assert.equal(result.identities.target.tree, targetTree);
+  assert.equal(result.identities.target.entrypoint.gitBlob, targetBlob);
+  assert.equal(result.identities.target.entrypoint.sha256, digest(targetBytes));
+  assert.equal(result.identities.runner.id, 'mdlm-phase1-qualification-harness');
+  assert.match(result.identities.runner.manifestSha256, /^[0-9a-f]{64}$/);
+  assert.deepEqual(result.identities.adapter, { id: 'run-exact@2' });
+  assert.equal(result.identities.profile.id, 'controlled-case-test-profile');
+  assert.match(result.identities.profile.sha256, /^[0-9a-f]{64}$/);
 }
 
 async function rejectedFixture(mutator, code) {
@@ -118,10 +131,10 @@ test('executeControlledCase preserves binary stdin and fixtures with exact ident
     assert.equal(result.schemaVersion, 1);
     assert.equal(result.kind, 'controlled-case-result');
     assert.deepEqual(result.capabilities, {
-      provided: ['controlled-execution@1', 'execution-profile@1'],
+      implemented: ['controlled-execution@1', 'execution-profile@1'],
       required: request.capabilities.required,
     });
-    assert.deepEqual(result.identities, request.identities);
+    assertDerivedIdentities(result);
     assert.equal(result.complete, true);
     assert.equal(result.truncated, false);
     assert.deepEqual(result.environment.attested, {
@@ -277,6 +290,117 @@ for (const [name, mode, expected] of [
   });
 }
 
+for (const [name, mode] of [
+  ['fixture leaf replacement with an outside symlink', 'replace-fixture-leaf', 'file'],
+  ['fixture parent replacement with an outside symlink', 'replace-fixture-parent', 'directory'],
+  ['TOCTOU-style fixture inode replacement with an outside hard link', 'replace-fixture-hardlink', 'file'],
+]) {
+  test(`executeControlledCase rejects ${name} without reading outside bytes`, async () => {
+    const temporary = mkdtempSync(path.join(tmpdir(), 'phase1-controlled-outside-'));
+    try {
+      const outsideDirectory = path.join(temporary, 'outside');
+      const outsideTarget = path.join(outsideDirectory, 'input.bin');
+      mkdirSync(outsideDirectory);
+      const outsideBytes = Buffer.from(`outside-${mode}`);
+      writeFileSync(outsideTarget, outsideBytes);
+      const request = requestFor(temporary);
+      request.case.argv[0] = mode;
+      request.executionProfile.environment.variables.OUTSIDE_TARGET = outsideTarget;
+      request.executionProfile.environment.variables.OUTSIDE_DIRECTORY = outsideDirectory;
+      const result = await executeControlledCase(request);
+      assert.equal(result.complete, false);
+      assert.ok(errorWithCode(result, 'POST_OBSERVATION_FAILED'), JSON.stringify(result.errors));
+      assert.equal(result.post.complete, false);
+      assert.equal(JSON.stringify(result.post).includes(digest(outsideBytes)), false);
+      assertWorkspaceCleaned(result);
+    } finally {
+      rmSync(temporary, { recursive: true, force: true });
+    }
+  });
+}
+
+test('executeControlledCase bounds post-execution fixture growth without an unbounded read', async () => {
+  const temporary = mkdtempSync(path.join(tmpdir(), 'phase1-controlled-growth-'));
+  try {
+    const request = requestFor(temporary);
+    request.case.argv[0] = 'grow-fixture';
+    const result = await executeControlledCase(request);
+    assert.equal(result.complete, false);
+    assert.ok(errorWithCode(result, 'POST_OBSERVATION_FAILED'), JSON.stringify(result.errors));
+    assert.equal(result.post.complete, false);
+    assertWorkspaceCleaned(result);
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+for (const [identity, mutate] of [
+  ['runner', (request) => { request.identities = { runner: { commit: 'f'.repeat(40) } }; }],
+  ['target', (request) => { request.target.entrypoint.gitBlob = 'e'.repeat(40); }],
+  ['profile', (request) => { request.identities = { profile: { sha256: 'd'.repeat(64) } }; }],
+]) {
+  test(`executeControlledCase rejects a spoofed ${identity} identity before execution`, async () => {
+    const temporary = mkdtempSync(path.join(tmpdir(), 'phase1-controlled-spoof-'));
+    try {
+      const request = requestFor(temporary, { launchMarker: true });
+      mutate(request);
+      const result = await executeControlledCase(request);
+      assert.equal(result.complete, false);
+      assert.equal(result.execution.started, false);
+      assert.ok(errorWithCode(result, 'UNAUTHENTICATED_IDENTITY'), JSON.stringify(result.errors));
+      assert.equal(existsSync(path.join(temporary, 'launch-marker')), false);
+    } finally {
+      rmSync(temporary, { recursive: true, force: true });
+    }
+  });
+}
+
+test('executeControlledCase reports POST_OBSERVATION_FAILED when a retained fixture disappears', async () => {
+  const temporary = mkdtempSync(path.join(tmpdir(), 'phase1-controlled-post-failure-'));
+  try {
+    const request = requestFor(temporary);
+    request.case.argv[0] = 'delete-fixture';
+    const result = await executeControlledCase(request);
+    assert.equal(result.complete, false);
+    assert.ok(errorWithCode(result, 'POST_OBSERVATION_FAILED'), JSON.stringify(result.errors));
+    assertWorkspaceCleaned(result);
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test('executeControlledCase reports OBSERVATION_TRUNCATED and fails closed', async () => {
+  const temporary = mkdtempSync(path.join(tmpdir(), 'phase1-controlled-truncation-'));
+  try {
+    const request = requestFor(temporary);
+    request.case.argv[0] = 'truncate-output';
+    request.executionProfile.limits.maxOutputBytes = 64;
+    const result = await executeControlledCase(request);
+    assert.equal(result.complete, false);
+    assert.equal(result.truncated, true);
+    assert.ok(errorWithCode(result, 'OBSERVATION_TRUNCATED'), JSON.stringify(result.errors));
+    assertWorkspaceCleaned(result);
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test('executeControlledCase reports PROCESS_CLEANUP_FAILED when cleanup exceeds its evidence bound', async () => {
+  const temporary = mkdtempSync(path.join(tmpdir(), 'phase1-controlled-process-cleanup-'));
+  try {
+    const request = requestFor(temporary);
+    request.case.argv[0] = 'hang-with-descendant';
+    request.executionProfile.limits.deadlineMs = 50;
+    request.executionProfile.limits.maxCleanupWaitMs = 0;
+    const result = await executeControlledCase(request);
+    assert.equal(result.complete, false);
+    assert.ok(errorWithCode(result, 'PROCESS_CLEANUP_FAILED'), JSON.stringify(result.errors));
+    assertWorkspaceCleaned(result);
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
 test('controlled-case CLI writes the complete typed result', () => {
   const temporary = mkdtempSync(path.join(tmpdir(), 'phase1-controlled-cli-'));
   try {
@@ -294,7 +418,7 @@ test('controlled-case CLI writes the complete typed result', () => {
     const result = JSON.parse(readFileSync(outputPath, 'utf8'));
     assert.equal(result.kind, 'controlled-case-result');
     assert.equal(result.complete, true);
-    assert.deepEqual(result.identities, requestFor(temporary).identities);
+    assertDerivedIdentities(result);
   } finally {
     rmSync(temporary, { recursive: true, force: true });
   }

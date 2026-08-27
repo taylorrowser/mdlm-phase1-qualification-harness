@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "controlled-calculator-candidate",
+  "qualificationStatus": "candidate-not-qualified",
+  "repository": "https://github.com/taylorrowser/mdlm-calculator-pilot.git",
+  "commit": "709497b329505a3c2a6f9d62abe2528099e14aaf",
+  "tree": "b914b325eaa88441916a0d1b806e3cf11a3c804c",
+  "entrypoint": {
+    "runtime": "node",
+    "path": "cli.mjs",
+    "gitBlob": "33864ab91539b57406f115c86072570a2e6ce886",
+    "sha256": "ffac00d2c090075a9857f3106cd33c32748dc675702a607545c443d845b3440b"
+  },
+  "capabilities": {
+    "required": ["controlled-execution@1", "execution-profile@1"]
+  },
+  "executionProfile": {
+    "schemaVersion": 1,
+    "id": "controlled-execution-candidate-v1",
+    "environment": {
+      "LANG": "C.UTF-8",
+      "LC_ALL": "C.UTF-8",
+      "TZ": "UTC",
+      "variables": {}
+    },
+    "limits": {
+      "deadlineMs": 2000,
+      "termGraceMs": 100,
+      "maxCleanupWaitMs": 1000,
+      "streamDrainMs": 250,
+      "maxPathBytes": 120,
+      "maxFixtureBytes": 1048576,
+      "maxAggregateFixtureBytes": 4194304,
+      "maxStdinBytes": 1048576,
+      "maxOutputBytes": 1048576
+    }
+  },
+  "cases": [
+    { "id": "normal", "argv": ["1", "+", "2"], "expected": { "status": 0, "stdoutBase64": "Mwo=", "stderrBase64": "" } },
+    { "id": "raw-malformed", "argv": ["1e2", "+", "2"], "expected": { "status": 2, "stdoutBase64": "", "stderrBase64": "aW52YWxpZCBpbnB1dAo=" } },
+    { "id": "omitted", "argv": ["1", "+"], "expected": { "status": 2, "stdoutBase64": "", "stderrBase64": "aW52YWxpZCBpbnB1dAo=" } },
+    { "id": "extra", "argv": ["1", "+", "2", "extra"], "expected": { "status": 2, "stdoutBase64": "", "stderrBase64": "aW52YWxpZCBpbnB1dAo=" } }
+  ]
+}

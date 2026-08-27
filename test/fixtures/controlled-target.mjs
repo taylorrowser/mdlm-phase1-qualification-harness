@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { appendFileSync, chmodSync, readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, chmodSync, linkSync, readFileSync, renameSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 
 const [mode = 'observe', fixturePath] = process.argv.slice(2);
 
@@ -34,6 +34,24 @@ if (mode === 'hang-with-descendant') {
     chmodSync(fixturePath, 0o600);
     writeFileSync(fixturePath, Buffer.from('changed'));
   }
+  if (mode === 'replace-fixture-leaf') {
+    rmSync(fixturePath);
+    symlinkSync(process.env.OUTSIDE_TARGET, fixturePath);
+  }
+  if (mode === 'replace-fixture-parent') {
+    renameSync('data', 'original-data');
+    symlinkSync(process.env.OUTSIDE_DIRECTORY, 'data');
+  }
+  if (mode === 'replace-fixture-hardlink') {
+    rmSync(fixturePath);
+    linkSync(process.env.OUTSIDE_TARGET, fixturePath);
+  }
+  if (mode === 'grow-fixture') {
+    chmodSync(fixturePath, 0o600);
+    writeFileSync(fixturePath, Buffer.alloc(4096, 0x67));
+  }
+  if (mode === 'delete-fixture') rmSync(fixturePath);
+  if (mode === 'truncate-output') process.stdout.write('x'.repeat(4096));
   if (mode === 'block-workspace') chmodSync('.', 0o000);
   if (mode === 'nonzero') process.exitCode = 7;
 }
