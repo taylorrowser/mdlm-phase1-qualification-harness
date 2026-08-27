@@ -57,7 +57,7 @@ function createLocalTarget(name, entrypoint, mode) {
   };
 }
 
-function runLocalPilot(target, { id, argv, expected }) {
+function runLocalPilot(target, { id, argv, expected, controlled = false }) {
   const temporary = mkdtempSync(path.join(tmpdir(), `phase1-pilot-${id}-`));
   try {
     const profilePath = path.join(temporary, 'profile.json');
@@ -72,6 +72,30 @@ function runLocalPilot(target, { id, argv, expected }) {
         runtime: 'executable', path: 'public-command', gitBlob: target.gitBlob, sha256: target.sha256,
       },
       deadlineMs: 1_000,
+      ...(controlled ? {
+        capabilities: { required: ['controlled-execution@1', 'execution-profile@1'] },
+        identities: {
+          runner: {
+            id: 'mdlm-phase1-qualification-harness',
+            commit: 'a'.repeat(40),
+            tree: 'b'.repeat(40),
+            executable: process.execPath,
+          },
+          adapter: { id: 'run-exact@2' },
+        },
+        executionProfile: {
+          schemaVersion: 1,
+          environment: { LANG: 'C.UTF-8', LC_ALL: 'C.UTF-8', TZ: 'UTC', variables: {} },
+          limits: {
+            deadlineMs: 1_000,
+            termGraceMs: 50,
+            maxPathBytes: 120,
+            maxFixtureBytes: 1024,
+            maxAggregateFixtureBytes: 2048,
+            maxStdinBytes: 1024,
+          },
+        },
+      } : {}),
       cases: [{ id: 'normal', argv, expected }],
     }));
     const result = spawnSync(process.execPath, [cli, 'pilot', '--profile', profilePath, '--repository', target.repository, '--commit', target.commit, '--output', output], { encoding: 'utf8' });
@@ -139,6 +163,26 @@ test('pilot executes an authenticated non-Node executable entrypoint', () => {
     assert.equal(evidence.cases[0].observation.status, 7);
     assert.equal(evidence.cases[0].observation.stdoutBase64, 'bm90LW5vZGUK');
     assert.equal(evidence.cases[0].observation.stderrBase64, 'c2VwYXJhdGUtc3RkZXJyCg==');
+  } finally {
+    rmSync(target.repository, { recursive: true, force: true });
+  }
+});
+
+test('pilot consumes an explicit controlled execution profile through capability IDs', () => {
+  const target = createLocalTarget('controlled', Buffer.from("#!/bin/sh\nprintf 'controlled\\n'\n"), 0o755);
+  try {
+    const { result, evidence } = runLocalPilot(target, {
+      id: 'controlled-executable',
+      argv: [],
+      expected: { status: 0, stdoutBase64: 'Y29udHJvbGxlZAo=', stderrBase64: '' },
+      controlled: true,
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(evidence.pass, true);
+    assert.deepEqual(evidence.capabilities.required, ['controlled-execution@1', 'execution-profile@1']);
+    assert.equal(evidence.cases[0].controlled.kind, 'controlled-case-result');
+    assert.equal(evidence.cases[0].controlled.complete, true);
+    assert.equal(evidence.cases[0].controlled.workspace.cleaned, true);
   } finally {
     rmSync(target.repository, { recursive: true, force: true });
   }

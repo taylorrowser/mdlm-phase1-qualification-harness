@@ -4,6 +4,20 @@
     "gitBlob": "sha1",
     "rawBytes": "sha256"
   },
+  "capabilities": {
+    "provided": [
+      "controlled-execution@1",
+      "execution-profile@1"
+    ],
+    "unsupported": [
+      "filesystem-trace@1",
+      "filesystem-fault-injection@1",
+      "returned-byte-observation@1",
+      "network-denial@1",
+      "network-attempt-observation@1",
+      "external-file-access-observation@1"
+    ]
+  },
   "bindings": {
     "runner": "bin/mdlm-phase1-qualify.mjs",
     "configuration": "config/qualification.json",
@@ -28,14 +42,14 @@
     {
       "path": "bin/mdlm-phase1-qualify.mjs",
       "mode": "100755",
-      "gitBlob": "0dfa8c5a770be1020e63207a6842537cd046c7f0",
-      "sha256": "3a5fe50ed61ba891f41932cbd7eea88ecad81dbefaf74e04a14c40fa2fd62052"
+      "gitBlob": "2a74773b04dffd3dd082f09de8913a2438be920e",
+      "sha256": "0646fd45e31674f281fc234b940d1f93ce126871ef1049ffdfe826449c289b67"
     },
     {
       "path": "config/qualification.json",
       "mode": "100644",
-      "gitBlob": "f9d3becb1e0cea7411f363c83b6f015bbcc0f46b",
-      "sha256": "465762d12601b42a257253ccaa0f600595cbc7a5dfb2e93360ac1704406d445b"
+      "gitBlob": "cb6c3b331ba7d7a6f1ea0f072d65c1e222b5c21b",
+      "sha256": "b4c597368895728c3305ea721f97ba0a73487de0d2489d9b5e017cc05496fb18"
     },
     {
       "path": "fixtures/calculator.mjs",
@@ -68,6 +82,12 @@
       "sha256": "c78ff084258549762065d958a8df5b02bcce2f9c042cfa227f92612ec9556f0a"
     },
     {
+      "path": "lib/controlled-execution.mjs",
+      "mode": "100644",
+      "gitBlob": "172209c94c1c57361e00d820c8bbccc781e84cc7",
+      "sha256": "591882170be3e317ecd5301d45b5a725980155e5fdd3e9e6103a3aee2c80da27"
+    },
+    {
       "path": "lib/evidence.mjs",
       "mode": "100644",
       "gitBlob": "db948e92aff5d97989972e18c3bbc7f356327f1d",
@@ -88,8 +108,8 @@
     {
       "path": "lib/pilot.mjs",
       "mode": "100644",
-      "gitBlob": "9127ea2720e3c346f25a0c97d7d738a63fbb6b5e",
-      "sha256": "dc686f6bde904636eb921a43a9f9e9b1ac4eeb1af4ce95fecf1945eec057eb91"
+      "gitBlob": "946916c0c950a39b528ecf0d92a6a5c52c31af1a",
+      "sha256": "fec331829ce1e5962305320ed94a9145af9578c875731dca3e6c44526ecdc586"
     },
     {
       "path": "lib/preflight.mjs",
@@ -100,8 +120,8 @@
     {
       "path": "lib/process-runner.mjs",
       "mode": "100644",
-      "gitBlob": "85fc0c67f4b7510b7dd6ade52fec982d24d7c8e9",
-      "sha256": "c576df78e0f29ce321054dadfa7a40cb4902b7f9e7389a57908fa2e912025b2b"
+      "gitBlob": "399674631c9dafecf7887a975ab431ed8bf4e508",
+      "sha256": "44f3a401896c84c997c546db2e524faa1977fd4df7b228b6b5767825454879b7"
     },
     {
       "path": "lib/qualify.mjs",

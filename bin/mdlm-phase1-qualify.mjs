@@ -3,7 +3,8 @@ import { createHash } from 'node:crypto';
 import { lstat, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseOptions, requireSafeRelativePath } from '../lib/common.mjs';
+import { parseOptions, readJson, requireSafeRelativePath } from '../lib/common.mjs';
+import { executeControlledCase } from '../lib/controlled-execution.mjs';
 import { writeEvidence } from '../lib/evidence.mjs';
 import { calculatorObservation } from '../lib/oracles.mjs';
 import { pilot } from '../lib/pilot.mjs';
@@ -63,6 +64,14 @@ async function main(args) {
     }
     return;
   }
+  if (command === 'controlled-case') {
+    const options = parseOptions(rest, ['--request', '--output']);
+    const evidence = await executeControlledCase(await readJson(options['--request']));
+    await writeEvidence(options['--output'], evidence);
+    process.stdout.write(`${JSON.stringify({ ok: evidence.complete, output: options['--output'] })}\n`);
+    if (!evidence.complete) process.exitCode = 1;
+    return;
+  }
   if (command === 'pilot') {
     const options = parseOptions(rest, ['--profile', '--repository', '--commit', '--output']);
     try {
@@ -76,7 +85,7 @@ async function main(args) {
     }
     return;
   }
-  throw new Error(`usage: mdlm-phase1-qualify <self-check|preflight|qualify|pilot>`);
+  throw new Error(`usage: mdlm-phase1-qualify <self-check|preflight|qualify|controlled-case|pilot>`);
 }
 
 main(process.argv.slice(2)).catch((error) => {
