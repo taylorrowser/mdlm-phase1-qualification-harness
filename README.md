@@ -19,7 +19,7 @@ The npm process is the trusted launch boundary. Remove `NODE_OPTIONS` before sta
 env -u NODE_OPTIONS npm run self-check
 ```
 
-Every npm script clears `NODE_OPTIONS` again before it starts the trusted Node executable. The process runner uses `process.execPath` and gives qualification fixtures, pilot products, and preflight self-checks a minimal platform environment instead of ambient Node startup options.
+Every npm script clears `NODE_OPTIONS` again before it starts the trusted Node executable. Qualification fixtures and preflight self-checks use `process.execPath`. Pilot profiles choose an explicit entrypoint mode. Every child receives a minimal platform environment instead of ambient Node startup options.
 
 ## Commands
 
@@ -72,7 +72,18 @@ env -u NODE_OPTIONS npm run pilot -- \
   --output /tmp/temperature-pilot.json
 ```
 
-Each profile fixes the repository, commit, tree, public entrypoint path, entrypoint Git blob, entrypoint raw SHA-256, cases, and observations. Pilot fetches Git objects without checkout, rejects unsafe tree entries, verifies the entrypoint bytes, and materializes only that entrypoint. It executes the verified file with `process.execPath`. Pilot records the actual Node executable and version. It does not read product test blobs or other product file contents.
+Each profile fixes the repository, commit, tree, public entrypoint path, entrypoint Git mode, entrypoint Git blob, entrypoint raw SHA-256, cases, and observations. Pilot fetches Git objects without checkout, rejects unsafe tree entries, verifies the entrypoint bytes, and materializes only that entrypoint. It does not read product test blobs or other product file contents.
+
+The profile must select one entrypoint mode:
+
+- `"runtime": "node"` invokes `process.execPath` with the authenticated entrypoint path as its first argument. Pilot records the Node executable and version.
+- `"runtime": "executable"` invokes the authenticated materialized path directly. This mode requires Git mode `100755`; pilot does not infer or select an interpreter.
+
+Pilot rejects other modes, unsafe paths, symlinks, submodules, non-regular files, and executable mode without a Git-authenticated executable bit. Materialized files have mode `0500`. Pilot verifies the file and its permissions before execution and after every case, so entrypoint mutation invalidates the run. Both modes use the same process-group isolation, separate bounded stdout and stderr capture, deadlines, descendant cleanup, and cleanup evidence.
+
+## Preserved JSON Maximum Depth runs
+
+Preserved JSON Maximum Depth run 051 stopped, while run 052 was accepted under the prior qualified harness identity. Adding executable entrypoint mode changes that identity, so these runs cannot use option 6 runner-only recovery. Do not replay or migrate them. Start a fresh lane only after this harness change has been reviewed and qualified.
 
 ## Independent checks
 
