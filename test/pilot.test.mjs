@@ -57,7 +57,7 @@ function createLocalTarget(name, entrypoint, mode) {
   };
 }
 
-function runLocalPilot(target, { id, argv, expected }) {
+function runLocalPilot(target, { id, argv, expected, controlled = false }) {
   const temporary = mkdtempSync(path.join(tmpdir(), `phase1-pilot-${id}-`));
   try {
     const profilePath = path.join(temporary, 'profile.json');
@@ -72,6 +72,23 @@ function runLocalPilot(target, { id, argv, expected }) {
         runtime: 'executable', path: 'public-command', gitBlob: target.gitBlob, sha256: target.sha256,
       },
       deadlineMs: 1_000,
+      ...(controlled ? {
+        capabilities: { required: ['controlled-execution@1', 'execution-profile@1'] },
+        executionProfile: {
+          schemaVersion: 1,
+          id: `${id}-controlled-profile`,
+          environment: { LANG: 'C.UTF-8', LC_ALL: 'C.UTF-8', TZ: 'UTC', variables: {} },
+          limits: {
+            deadlineMs: 1_000,
+            termGraceMs: 50,
+            maxPathBytes: 120,
+            maxFixtureBytes: 1024,
+            maxAggregateFixtureBytes: 2048,
+            maxStdinBytes: 1024,
+            maxOutputBytes: 1024,
+          },
+        },
+      } : {}),
       cases: [{ id: 'normal', argv, expected }],
     }));
     const result = spawnSync(process.execPath, [cli, 'pilot', '--profile', profilePath, '--repository', target.repository, '--commit', target.commit, '--output', output], { encoding: 'utf8' });
@@ -141,6 +158,50 @@ test('pilot executes an authenticated non-Node executable entrypoint', () => {
     assert.equal(evidence.cases[0].observation.stderrBase64, 'c2VwYXJhdGUtc3RkZXJyCg==');
   } finally {
     rmSync(target.repository, { recursive: true, force: true });
+  }
+});
+
+test('pilot consumes an explicit controlled execution profile through capability IDs', () => {
+  const target = createLocalTarget('controlled', Buffer.from("#!/bin/sh\nprintf 'controlled\\n'\n"), 0o755);
+  try {
+    const { result, evidence } = runLocalPilot(target, {
+      id: 'controlled-executable',
+      argv: [],
+      expected: { status: 0, stdoutBase64: 'Y29udHJvbGxlZAo=', stderrBase64: '' },
+      controlled: true,
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(evidence.pass, true);
+    assert.deepEqual(evidence.capabilities.required, ['controlled-execution@1', 'execution-profile@1']);
+    assert.equal(evidence.cases[0].controlled.kind, 'controlled-case-result');
+    assert.equal(evidence.cases[0].controlled.complete, true);
+    assert.equal(evidence.cases[0].controlled.workspace.cleaned, true);
+  } finally {
+    rmSync(target.repository, { recursive: true, force: true });
+  }
+});
+
+test('pilot routes the committed controlled candidate profile through executeControlledCase', { timeout: 20_000 }, () => {
+  const temporary = mkdtempSync(path.join(tmpdir(), 'phase1-pilot-committed-controlled-'));
+  try {
+    const output = path.join(temporary, 'evidence.json');
+    const profile = JSON.parse(readFileSync(path.join(root, 'profiles/controlled-calculator-candidate.json'), 'utf8'));
+    const result = spawnSync(process.execPath, [
+      cli, 'pilot',
+      '--profile', path.join(root, 'profiles/controlled-calculator-candidate.json'),
+      '--repository', profile.repository,
+      '--commit', profile.commit,
+      '--output', output,
+    ], { encoding: 'utf8', timeout: 15_000 });
+    assert.equal(result.status, 0, result.stderr);
+    const evidence = JSON.parse(readFileSync(output, 'utf8'));
+    assert.equal(evidence.pass, true);
+    assert.equal(evidence.qualificationStatus, 'candidate-not-qualified');
+    assert.equal(evidence.cases.length, 4);
+    assert.equal(evidence.cases.every((entry) => entry.controlled.complete), true);
+    assert.equal(evidence.cases.every((entry) => entry.controlled.identities.profile.id === 'controlled-execution-candidate-v1'), true);
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
   }
 });
 

@@ -1,13 +1,27 @@
 {
   "schemaVersion": 1,
   "assetRoot": "..",
+  "capabilities": {
+    "candidates": [
+      { "id": "controlled-execution@1", "qualificationStatus": "not-qualified" },
+      { "id": "execution-profile@1", "qualificationStatus": "not-qualified" }
+    ],
+    "unsupported": [
+      "filesystem-trace@1",
+      "filesystem-fault-injection@1",
+      "returned-byte-observation@1",
+      "network-denial@1",
+      "network-attempt-observation@1",
+      "external-file-access-observation@1"
+    ]
+  },
   "bindings": {
     "runner": "bin/mdlm-phase1-qualify.mjs",
     "configuration": "config/qualification.json",
     "fixtures": ["fixtures/calculator.mjs", "fixtures/temperature.mjs", "fixtures/nonconforming.mjs"],
     "oracles": ["lib/oracles.mjs"],
     "probes": ["probes/node24.mjs", "probes/raw-streams.mjs"],
-    "profiles": ["profiles/calculator.json", "profiles/temperature.json"]
+    "profiles": ["profiles/calculator.json", "profiles/temperature.json", "profiles/controlled-calculator-candidate.json"]
   },
   "deadlineMs": 2000,
   "termGraceMs": 100,

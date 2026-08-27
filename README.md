@@ -1,11 +1,12 @@
 # MDLM Phase 1 qualification harness
 
-This public Node 24 repository provides two separate operations:
+This public Node 24 repository provides three separate operations:
 
 - `qualify` checks the source-independent harness with synthetic fixtures, probes, and independent oracles. It never accepts a product repository.
+- `controlled-case` executes one typed request in a fresh private workspace.
 - `pilot` runs one public product entrypoint from an exact commit against the literal cases in a profile.
 
-The harness uses Node's standard library and Git. Child-process observations retain separate bounded stdout and stderr prefixes as base64, status, signal, deadline, truncation, and cleanup fields. On Linux, timeout handling signals the process group and known descendants with SIGTERM, then SIGKILL. `cleanupComplete: false` makes a check fail. The runner does not claim that it can reap an unknown process that escaped before Linux `/proc` exposed it.
+The harness uses Node's standard library and Git. Child-process observations retain separate bounded stdout and stderr prefixes as base64, status, signal, deadline, truncation, and cleanup fields. On Linux, timeout handling signals the process group and known descendants with SIGTERM, then SIGKILL. `cleanupComplete: false` or incomplete child-close/stdout-end/stderr-end evidence makes a check fail. The runner does not claim that it can reap an unknown process that escaped before Linux `/proc` exposed it.
 
 ## Requirements
 
@@ -56,6 +57,20 @@ env -u NODE_OPTIONS npm run preflight -- --env /tmp/env.json --vai /tmp/vai.json
 
 Preflight fetches into a new bare object store with system and global Git configuration disabled. It does not checkout files. It rejects `.lifecycle/`, symlinks, submodules, non-regular entries, path escapes, and object or digest disagreement. It reads exact Git blobs, verifies their manifest Git object IDs and raw SHA-256 values, then materializes only verified bytes in a process-owned temporary directory. The runner executes through `process.execPath`. Success requires the exact structured self-check value, empty stderr, bounded output, and complete reported cleanup.
 
+Run a controlled case whose JSON request declares `controlled-execution@1` and `execution-profile@1`:
+
+```sh
+env -u NODE_OPTIONS npm run controlled-case -- \
+  --request /tmp/controlled-case-request.json \
+  --output /tmp/controlled-case-result.json
+```
+
+The request declares exact target repository, commit, tree, mode, blob, digest, runtime, and path pins. The harness fetches and opens those Git objects before creating the execution workspace. Caller-supplied runner, target, adapter, or profile identities are rejected. The result derives the runner from the executing checkout and authenticated manifest, the target from the fetched Git object and opened bytes, and the execution-profile digest from canonical JSON bytes.
+
+Entrypoint, stdin, and regular-file fixture bytes use canonical base64 and exact SHA-256 values. The execution profile bounds stdin, fixture sizes, aggregate fixture size, paths, output, stream drain, process cleanup, and time. It also declares the only environment variables sent to the child, including exact `LANG`, `LC_ALL`, and `TZ` values. The result records setup and post-execution metadata, raw streams, child close and stream-end evidence, stdin write and EOF evidence, process cleanup, workspace cleanup, truncation, completeness, and typed errors. Post-execution observation reads only retained `O_NOFOLLOW` descriptors with bounded `fstat` and descriptor reads; path checks reject replaced parents, leaves, and symlinks without reading through target-controlled paths.
+
+The harness rejects unsupported `filesystem-trace@1`, `filesystem-fault-injection@1`, `returned-byte-observation@1`, `network-denial@1`, `network-attempt-observation@1`, and `external-file-access-observation@1` requirements before workspace creation. It does not implement those controls.
+
 Run the public pilot profiles:
 
 ```sh
@@ -73,6 +88,8 @@ env -u NODE_OPTIONS npm run pilot -- \
 ```
 
 Each profile fixes the repository, commit, tree, public entrypoint path, entrypoint Git mode, entrypoint Git blob, entrypoint raw SHA-256, cases, and observations. Pilot fetches Git objects without checkout, rejects unsafe tree entries, verifies the entrypoint bytes, and materializes only that entrypoint. It does not read product test blobs or other product file contents.
+
+A controlled pilot profile adds `capabilities` and an identified `executionProfile`. Pilot injects the authenticated target pins and entrypoint bytes, then calls `executeControlledCase` for every case. Each case gets a fresh workspace and may declare stdin and fixtures. Legacy profiles without those fields retain the original entrypoint-only behavior. `profiles/controlled-calculator-candidate.json` exercises this route but is marked `candidate-not-qualified`; production configuration and the manifest do not claim either controlled capability as provided.
 
 The profile must select one entrypoint mode:
 

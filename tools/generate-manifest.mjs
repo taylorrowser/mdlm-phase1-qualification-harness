@@ -9,7 +9,9 @@ const configuration = JSON.parse(await readFile(path.join(root, 'config/qualific
 const support = [
   'lib/bindings.mjs',
   'lib/common.mjs',
+  'lib/controlled-execution.mjs',
   'lib/evidence.mjs',
+  'lib/execution-identity.mjs',
   'lib/git-objects.mjs',
   'lib/oracles.mjs',
   'lib/pilot.mjs',
@@ -34,6 +36,7 @@ for (const assetPath of paths) {
 const manifest = {
   schemaVersion: 1,
   algorithm: { gitBlob: 'sha1', rawBytes: 'sha256' },
+  capabilities: configuration.capabilities,
   bindings: configuration.bindings,
   assets,
 };

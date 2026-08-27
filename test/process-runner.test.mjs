@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -111,6 +112,52 @@ test('timeout returns with bounded streams after a detached descendant inherits 
   }
 });
 
+test('runner drains stdout and stderr emitted after exit before returning complete evidence', async () => {
+  const root = mkdtempSync(path.join(tmpdir(), 'phase1-trailing-streams-'));
+  try {
+    const descendant = path.join(root, 'descendant.mjs');
+    const parent = path.join(root, 'parent.mjs');
+    writeFileSync(descendant, [
+      "import { writeSync } from 'node:fs';",
+      "setTimeout(() => { writeSync(1, 'stdout-after-exit\\n'); writeSync(2, 'stderr-after-exit\\n'); }, 25);",
+    ].join('\n'));
+    writeFileSync(parent, [
+      "import { spawn } from 'node:child_process';",
+      "import { writeSync } from 'node:fs';",
+      "writeSync(1, 'stdout-before-exit\\n'); writeSync(2, 'stderr-before-exit\\n');",
+      `spawn(process.execPath, [${JSON.stringify(descendant)}], { stdio: ['ignore', process.stdout, process.stderr] });`,
+      'process.exit(0);',
+    ].join('\n'));
+    const result = await runExact(process.execPath, [parent], {
+      deadlineMs: 1_000,
+      termGraceMs: 50,
+      streamDrainMs: 250,
+    });
+    assert.equal(result.status, 0);
+    assert.equal(result.stdout.toString(), 'stdout-before-exit\nstdout-after-exit\n');
+    assert.equal(result.stderr.toString(), 'stderr-before-exit\nstderr-after-exit\n');
+    assert.deepEqual(result.streams, {
+      childClose: true,
+      stdoutEnded: true,
+      stderrEnded: true,
+      complete: true,
+    });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('runner retains trailing bytes written in the child exit handler', async () => {
+  const result = await runExact(process.execPath, ['-e', [
+    "const { writeSync } = require('node:fs');",
+    "writeSync(1, 'stdout-main\\n'); writeSync(2, 'stderr-main\\n');",
+    "process.on('exit', () => { writeSync(1, 'stdout-close\\n'); writeSync(2, 'stderr-close\\n'); });",
+  ].join('')], { deadlineMs: 1_000, termGraceMs: 50 });
+  assert.equal(result.stdout.toString(), 'stdout-main\nstdout-close\n');
+  assert.equal(result.stderr.toString(), 'stderr-main\nstderr-close\n');
+  assert.equal(result.streams.complete, true);
+});
+
 test('runner aggregates every case after failures', async () => {
   const cases = [
     { id: 'fail', executable: process.execPath, argv: ['-e', 'process.exit(3)'] },
@@ -120,4 +167,100 @@ test('runner aggregates every case after failures', async () => {
   assert.equal(results.length, 2);
   assert.equal(results[0].status, 3);
   assert.equal(results[1].stdout.toString(), 'ran');
+});
+
+test('runExact writes exact binary stdin and closes it deterministically', async () => {
+  const stdin = Buffer.from([0x00, 0xff, 0x0a, 0x0d, 0x41]);
+  const result = await runExact(process.execPath, ['-e', [
+    'const chunks = [];',
+    "process.stdin.on('data', (chunk) => chunks.push(chunk));",
+    "process.stdin.on('end', () => process.stdout.write(Buffer.concat(chunks)));",
+  ].join('')], {
+    stdin,
+    deadlineMs: 1_000,
+    termGraceMs: 50,
+  });
+  assert.equal(result.status, 0);
+  assert.deepEqual(result.stdout, stdin);
+  assert.deepEqual(result.stdin, {
+    supplied: true,
+    expectedBytes: stdin.length,
+    writtenBytes: stdin.length,
+    sha256: createHash('sha256').update(stdin).digest('hex'),
+    eof: 'closed',
+    complete: true,
+    error: null,
+  });
+});
+
+test('runExact accepts large bounded stdin without changing its bytes', async () => {
+  const stdin = Buffer.alloc(1024 * 1024 + 17);
+  for (let index = 0; index < stdin.length; index += 1) stdin[index] = index % 251;
+  const expectedDigest = createHash('sha256').update(stdin).digest('hex');
+  const result = await runExact(process.execPath, ['-e', [
+    "const { createHash } = require('node:crypto');",
+    "const hash = createHash('sha256'); let size = 0;",
+    "process.stdin.on('data', (chunk) => { hash.update(chunk); size += chunk.length; });",
+    "process.stdin.on('end', () => process.stdout.write(JSON.stringify({ size, sha256: hash.digest('hex') })));",
+  ].join('')], {
+    stdin,
+    deadlineMs: 2_000,
+    termGraceMs: 50,
+  });
+  assert.equal(result.status, 0);
+  assert.deepEqual(JSON.parse(result.stdout.toString()), { size: stdin.length, sha256: expectedDigest });
+  assert.equal(result.stdin.complete, true);
+  assert.equal(result.stdin.writtenBytes, stdin.length);
+  assert.equal(result.stdin.eof, 'closed');
+});
+
+test('runExact distinguishes omitted stdin from explicitly empty stdin', async () => {
+  const command = ['-e', "process.stdin.resume(); process.stdin.on('end', () => process.stdout.write('eof'))"];
+  const omitted = await runExact(process.execPath, command, { deadlineMs: 1_000, termGraceMs: 50 });
+  const empty = await runExact(process.execPath, command, {
+    stdin: Buffer.alloc(0), deadlineMs: 1_000, termGraceMs: 50,
+  });
+  assert.equal(omitted.stdout.toString(), 'eof');
+  assert.equal(empty.stdout.toString(), 'eof');
+  assert.deepEqual(omitted.stdin, {
+    supplied: false, expectedBytes: null, writtenBytes: null, sha256: null,
+    eof: 'not-supplied', complete: true, error: null,
+  });
+  assert.deepEqual(empty.stdin, {
+    supplied: true, expectedBytes: 0, writtenBytes: 0,
+    sha256: createHash('sha256').update(Buffer.alloc(0)).digest('hex'),
+    eof: 'closed', complete: true, error: null,
+  });
+});
+
+test('runExact returns typed incomplete stdin evidence when the child exits early', async () => {
+  const stdin = Buffer.alloc(8 * 1024 * 1024, 0xa5);
+  const result = await runExact(process.execPath, ['-e', 'process.stdin.destroy(); process.exit(0)'], {
+    stdin,
+    deadlineMs: 1_000,
+    termGraceMs: 50,
+  });
+  assert.equal(result.status, 0);
+  assert.equal(result.stdin.supplied, true);
+  assert.equal(result.stdin.complete, false);
+  assert.ok(result.stdin.writtenBytes < stdin.length);
+  assert.equal(result.stdin.eof, 'write-failed');
+  assert.equal(result.stdin.error.code, 'STDIN_WRITE_INCOMPLETE');
+  assert.match(result.stdin.error.cause, /^(EPIPE|ERR_STREAM_DESTROYED)$/);
+});
+
+test('runExact applies the process deadline while stdin is backpressured', async () => {
+  const stdin = Buffer.alloc(8 * 1024 * 1024, 0xa5);
+  const result = await runExact(process.execPath, ['-e', 'setInterval(() => {}, 1_000)'], {
+    stdin,
+    deadlineMs: 100,
+    termGraceMs: 50,
+  });
+  assert.equal(result.timedOut, true);
+  assert.equal(result.cleanupComplete, true);
+  assert.equal(result.stdin.supplied, true);
+  assert.equal(result.stdin.complete, false);
+  assert.ok(result.stdin.writtenBytes < stdin.length);
+  assert.equal(result.stdin.error.code, 'STDIN_WRITE_INCOMPLETE');
+  assert.equal(result.stdin.error.cause, 'PROCESS_TIMEOUT');
 });
