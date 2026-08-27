@@ -88,8 +88,8 @@
     {
       "path": "lib/pilot.mjs",
       "mode": "100644",
-      "gitBlob": "3cd2de1d7293b7b3326dfa9bce04c4ed123246fb",
-      "sha256": "a303983f0b176f5c390a592c5edb048341609bd5f0dc8a860dcb2220f4812401"
+      "gitBlob": "9127ea2720e3c346f25a0c97d7d738a63fbb6b5e",
+      "sha256": "dc686f6bde904636eb921a43a9f9e9b1ac4eeb1af4ce95fecf1945eec057eb91"
     },
     {
       "path": "lib/preflight.mjs",
