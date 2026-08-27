@@ -9,6 +9,7 @@ import test, { after } from 'node:test';
 import { executeControlledCase } from '../lib/controlled-execution.mjs';
 
 const root = path.resolve('.');
+const packageMetadata = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
 const targetBytes = readFileSync(path.join(root, 'test/fixtures/controlled-target.mjs'));
 const fixtureBytes = Buffer.from([0x00, 0xff, 0x0a, 0x0d, 0x41]);
 const targetRepository = mkdtempSync(path.join(tmpdir(), 'phase1-controlled-target-repository-'));
@@ -107,6 +108,14 @@ function assertDerivedIdentities(result) {
   assert.equal(result.identities.profile.id, 'controlled-case-test-profile');
   assert.match(result.identities.profile.sha256, /^[0-9a-f]{64}$/);
 }
+
+test('public npm test selects only intended top-level tests', () => {
+  assert.equal(
+    packageMetadata.scripts.test,
+    'NODE_OPTIONS= "$npm_node_execpath" --test --test-concurrency=1 test/*.test.mjs',
+  );
+  assert.equal(digest(targetBytes), '92d3c90e91720e0a8ec57bc2395ff96674744a799922f4f26bdae10bf86f4853');
+});
 
 async function rejectedFixture(mutator, code) {
   const temporary = mkdtempSync(path.join(tmpdir(), 'phase1-controlled-rejected-'));

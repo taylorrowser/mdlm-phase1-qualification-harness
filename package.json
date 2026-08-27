@@ -7,7 +7,7 @@
     "mdlm-phase1-qualify": "bin/mdlm-phase1-qualify.mjs"
   },
   "scripts": {
-    "test": "NODE_OPTIONS= \"$npm_node_execpath\" --test --test-concurrency=1",
+    "test": "NODE_OPTIONS= \"$npm_node_execpath\" --test --test-concurrency=1 test/*.test.mjs",
     "self-check": "NODE_OPTIONS= \"$npm_node_execpath\" bin/mdlm-phase1-qualify.mjs self-check",
     "qualify": "NODE_OPTIONS= \"$npm_node_execpath\" bin/mdlm-phase1-qualify.mjs qualify",
     "preflight": "NODE_OPTIONS= \"$npm_node_execpath\" bin/mdlm-phase1-qualify.mjs preflight",

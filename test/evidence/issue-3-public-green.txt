@@ -1,0 +1,31 @@
+Node: v24.19.0
+
+Command: env -u NODE_OPTIONS npm test
+Started: 2026-08-27T23:58:00.714570108Z
+Completed: 2026-08-27T23:58:13.593196776Z
+Exit status: 0
+Elapsed: 12876 ms
+Tests: 80 passed, 0 failed
+stdout bytes: 7952
+stderr bytes: 0
+stdout SHA-256: 8b56182e42f57a51d59480865ead928c53c24a37c5fe2b08498db57d4a08d610
+stderr SHA-256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+The TAP output contains the package-script regression and no standalone
+test/fixtures/controlled-target.mjs entry.
+
+Command: env -u NODE_OPTIONS node --test --test-concurrency=1 --test-name-pattern='preserves binary stdin|does not inherit ambient|retains typed evidence' test/controlled-execution.test.mjs
+Exit status: 0
+Tests: 7 passed, 0 failed
+stderr bytes: 0
+
+Command: env -u NODE_OPTIONS npm run self-check
+Exit status: 0
+Result: {"ok":true,"node":"24.19.0","assets":21}
+stderr bytes: 0
+
+Command: env -u NODE_OPTIONS npm run manifest
+Exit status: 0
+Manifest byte comparison: unchanged
+Manifest SHA-256: f136561b0635810c81d20a2be965536c204b4ae6035297e3cab28ab8f6df532b
+Controlled target SHA-256: 92d3c90e91720e0a8ec57bc2395ff96674744a799922f4f26bdae10bf86f4853
