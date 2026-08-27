@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readlinkSync, rmSync, writeFileSync } from 'node:fs';
+import { open } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test, { after } from 'node:test';
@@ -354,6 +355,70 @@ for (const [identity, mutate] of [
     }
   });
 }
+
+test('executeControlledCase closes a descriptor when setup observation and descriptor cleanup both fail', async () => {
+  const temporary = mkdtempSync(path.join(tmpdir(), 'phase1-controlled-setup-observation-'));
+  const probe = await open(path.join(root, 'package.json'), 'r');
+  const fileHandlePrototype = Object.getPrototypeOf(probe);
+  const originalStat = fileHandlePrototype.stat;
+  const controlledHandles = new Map();
+  await probe.close();
+
+  fileHandlePrototype.stat = async function injectedSetupObservationFailure(...args) {
+    let descriptorPath;
+    try {
+      descriptorPath = readlinkSync(`/proc/self/fd/${this.fd}`);
+    } catch {
+      return originalStat.apply(this, args);
+    }
+    if (!descriptorPath.includes('/mdlm-controlled-case-')) return originalStat.apply(this, args);
+
+    if (!controlledHandles.has(this)) {
+      const originalClose = this.close;
+      const record = { descriptorPath, closeCalls: 0, originalClose };
+      controlledHandles.set(this, record);
+      this.close = async (...closeArgs) => {
+        record.closeCalls += 1;
+        await originalClose.apply(this, closeArgs);
+        if (descriptorPath.endsWith('/data/input.bin')) {
+          const error = new Error('injected descriptor close failure');
+          error.code = 'EIO';
+          throw error;
+        }
+      };
+    }
+    if (descriptorPath.endsWith('/data/input.bin')) {
+      const error = new Error('injected setup observation failure');
+      error.code = 'EIO';
+      throw error;
+    }
+    return originalStat.apply(this, args);
+  };
+
+  try {
+    const result = await executeControlledCase(requestFor(temporary));
+    const records = [...controlledHandles.values()];
+    const entrypoint = records.find((record) => record.descriptorPath.endsWith('/target/controlled-target.mjs'));
+    const fixture = records.find((record) => record.descriptorPath.endsWith('/data/input.bin'));
+
+    assert.equal(result.complete, false);
+    assert.equal(result.setup.complete, false);
+    assert.equal(result.execution.started, false);
+    assert.equal(entrypoint?.closeCalls, 1);
+    assert.equal(fixture?.closeCalls, 1);
+    assert.equal(result.errors[0].code, 'CONTROLLED_CASE_FAILED');
+    assert.equal(result.errors[0].message, 'injected setup observation failure');
+    assert.equal(result.errors[1].code, 'DESCRIPTOR_CLEANUP_FAILED');
+    assert.equal(result.errors[1].details.message, 'injected descriptor close failure');
+    assertWorkspaceCleaned(result);
+  } finally {
+    fileHandlePrototype.stat = originalStat;
+    for (const [handle, record] of controlledHandles) {
+      if (record.closeCalls === 0) await record.originalClose.call(handle);
+    }
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
 
 test('executeControlledCase reports POST_OBSERVATION_FAILED when a retained fixture disappears', async () => {
   const temporary = mkdtempSync(path.join(tmpdir(), 'phase1-controlled-post-failure-'));
