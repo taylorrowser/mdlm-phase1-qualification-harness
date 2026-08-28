@@ -64,7 +64,7 @@ function makeFixture(product, mutate = () => {}) {
   };
   const evidenceSource = path.join(fixtureRoot, 'controls.json');
   const evidence = path.join(temporary, 'controls.json');
-  writeFileSync(evidence, readFileSync(evidenceSource));
+  writeFileSync(evidence, readFileSync(evidenceSource, 'utf8').replaceAll('$COMPOSED_IDENTITY', identityId));
   const controlsByCapability = {
     'phase1.exact-role-bindings': [['P-ROLE-EXACT'], ['N-ROLE-MISMATCH']],
     'phase1.process-contract-oracle': [['P-PROCESS-EXACT'], ['N-PROCESS-MISMATCH']],
@@ -258,6 +258,15 @@ const rejectionCases = [
     mutate: ({ evidence, inventory }) => {
       const document = JSON.parse(readFileSync(evidence, 'utf8'));
       document.controls[0].observed = 'rejected';
+      writeJson(evidence, document);
+      inventory.evidenceCatalog[0].sha256 = sha256(evidence);
+    },
+  },
+  {
+    name: 'historical selected evidence relabeled by the inventory', rejectedReason: 'historical-control-identity',
+    mutate: ({ evidence, inventory }) => {
+      const document = JSON.parse(readFileSync(evidence, 'utf8'));
+      document.controls[0].evidenceIdentity = 'historical';
       writeJson(evidence, document);
       inventory.evidenceCatalog[0].sha256 = sha256(evidence);
     },

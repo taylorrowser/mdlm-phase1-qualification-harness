@@ -1,16 +1,16 @@
 {
   "controls": [
-    { "id": "P-ROLE-EXACT", "stimulus": "exact role bindings", "expected": "accepted", "observed": "accepted", "outcome": "pass" },
-    { "id": "N-ROLE-MISMATCH", "stimulus": "one harness role differs", "expected": "rejected", "observed": "rejected", "outcome": "pass" },
-    { "id": "P-PROCESS-EXACT", "stimulus": "exact status and output", "expected": "accepted", "observed": "accepted", "outcome": "pass" },
-    { "id": "N-PROCESS-MISMATCH", "stimulus": "status and output differ", "expected": "rejected", "observed": "rejected", "outcome": "pass" },
-    { "id": "P-IDENTITY-EXACT", "stimulus": "exact composed identity", "expected": "accepted", "observed": "accepted", "outcome": "pass" },
-    { "id": "N-IDENTITY-DIGEST", "stimulus": "one identity digest differs", "expected": "rejected", "observed": "rejected", "outcome": "pass" },
-    { "id": "P-CLEAN-COMPLETION", "stimulus": "complete cleanup", "expected": "accepted", "observed": "accepted", "outcome": "pass" },
-    { "id": "N-CLEANUP-FAILURE", "stimulus": "controlled incomplete cleanup", "expected": "rejected", "observed": "rejected", "outcome": "pass" },
-    { "id": "P-CALCULATOR-CORRECT", "stimulus": "calculator correct result", "expected": "accepted", "observed": "accepted", "outcome": "pass" },
-    { "id": "P-TEMPERATURE-CORRECT", "stimulus": "temperature correct result", "expected": "accepted", "observed": "accepted", "outcome": "pass" },
-    { "id": "N-CALCULATOR-WRONG", "stimulus": "calculator wrong result", "expected": "rejected", "observed": "rejected", "outcome": "pass" },
-    { "id": "N-TEMPERATURE-WRONG", "stimulus": "temperature wrong result", "expected": "rejected", "observed": "rejected", "outcome": "pass" }
+    { "id": "P-ROLE-EXACT", "evidenceIdentity": "$COMPOSED_IDENTITY", "stimulus": "exact role bindings", "expected": "accepted", "observed": "accepted", "outcome": "pass" },
+    { "id": "N-ROLE-MISMATCH", "evidenceIdentity": "$COMPOSED_IDENTITY", "stimulus": "one harness role differs", "expected": "rejected", "observed": "rejected", "outcome": "pass" },
+    { "id": "P-PROCESS-EXACT", "evidenceIdentity": "$COMPOSED_IDENTITY", "stimulus": "exact status and output", "expected": "accepted", "observed": "accepted", "outcome": "pass" },
+    { "id": "N-PROCESS-MISMATCH", "evidenceIdentity": "$COMPOSED_IDENTITY", "stimulus": "status and output differ", "expected": "rejected", "observed": "rejected", "outcome": "pass" },
+    { "id": "P-IDENTITY-EXACT", "evidenceIdentity": "$COMPOSED_IDENTITY", "stimulus": "exact composed identity", "expected": "accepted", "observed": "accepted", "outcome": "pass" },
+    { "id": "N-IDENTITY-DIGEST", "evidenceIdentity": "$COMPOSED_IDENTITY", "stimulus": "one identity digest differs", "expected": "rejected", "observed": "rejected", "outcome": "pass" },
+    { "id": "P-CLEAN-COMPLETION", "evidenceIdentity": "$COMPOSED_IDENTITY", "stimulus": "complete cleanup", "expected": "accepted", "observed": "accepted", "outcome": "pass" },
+    { "id": "N-CLEANUP-FAILURE", "evidenceIdentity": "$COMPOSED_IDENTITY", "stimulus": "controlled incomplete cleanup", "expected": "rejected", "observed": "rejected", "outcome": "pass" },
+    { "id": "P-CALCULATOR-CORRECT", "evidenceIdentity": "$COMPOSED_IDENTITY", "stimulus": "calculator correct result", "expected": "accepted", "observed": "accepted", "outcome": "pass" },
+    { "id": "P-TEMPERATURE-CORRECT", "evidenceIdentity": "$COMPOSED_IDENTITY", "stimulus": "temperature correct result", "expected": "accepted", "observed": "accepted", "outcome": "pass" },
+    { "id": "N-CALCULATOR-WRONG", "evidenceIdentity": "$COMPOSED_IDENTITY", "stimulus": "calculator wrong result", "expected": "rejected", "observed": "rejected", "outcome": "pass" },
+    { "id": "N-TEMPERATURE-WRONG", "evidenceIdentity": "$COMPOSED_IDENTITY", "stimulus": "temperature wrong result", "expected": "rejected", "observed": "rejected", "outcome": "pass" }
   ]
 }
