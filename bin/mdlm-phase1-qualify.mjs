@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { parseOptions, readJson, requireSafeRelativePath } from '../lib/common.mjs';
 import { executeControlledCase } from '../lib/controlled-execution.mjs';
 import { writeEvidence } from '../lib/evidence.mjs';
+import { admitEnvironment } from '../lib/env-admission.mjs';
 import { calculatorObservation } from '../lib/oracles.mjs';
 import { pilot } from '../lib/pilot.mjs';
 import { preflight } from '../lib/preflight.mjs';
@@ -72,6 +73,19 @@ async function main(args) {
     if (!evidence.complete) process.exitCode = 1;
     return;
   }
+  if (command === 'admit-env') {
+    const options = parseOptions(rest, ['--profile', '--env', '--inventory', '--identity', '--output']);
+    const evidence = await admitEnvironment({
+      profile: options['--profile'],
+      env: options['--env'],
+      inventory: options['--inventory'],
+      identity: options['--identity'],
+    });
+    await writeEvidence(options['--output'], evidence);
+    process.stdout.write(`${JSON.stringify({ ok: evidence.status === 'admitted', output: options['--output'] })}\n`);
+    if (evidence.status !== 'admitted') process.exitCode = 1;
+    return;
+  }
   if (command === 'pilot') {
     const options = parseOptions(rest, ['--profile', '--repository', '--commit', '--output']);
     try {
@@ -85,7 +99,7 @@ async function main(args) {
     }
     return;
   }
-  throw new Error(`usage: mdlm-phase1-qualify <self-check|preflight|qualify|controlled-case|pilot>`);
+  throw new Error(`usage: mdlm-phase1-qualify <self-check|preflight|qualify|controlled-case|admit-env|pilot>`);
 }
 
 main(process.argv.slice(2)).catch((error) => {

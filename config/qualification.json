@@ -21,7 +21,12 @@
     "fixtures": ["fixtures/calculator.mjs", "fixtures/temperature.mjs", "fixtures/nonconforming.mjs"],
     "oracles": ["lib/oracles.mjs"],
     "probes": ["probes/node24.mjs", "probes/raw-streams.mjs"],
-    "profiles": ["profiles/calculator.json", "profiles/temperature.json", "profiles/controlled-calculator-candidate.json"]
+    "profiles": ["profiles/calculator.json", "profiles/temperature.json", "profiles/controlled-calculator-candidate.json"],
+    "admissionSchemas": ["schemas/composed-identity-v2.schema.json", "schemas/env-admission-result-v2.schema.json"],
+    "admissionProfiles": ["test/fixtures/admission/calculator-profile.json", "test/fixtures/admission/temperature-profile.json"],
+    "admissionEnvironments": ["test/fixtures/admission/calculator-env.json", "test/fixtures/admission/temperature-env.json"],
+    "admissionControls": ["test/fixtures/admission/controls.json"],
+    "admissionTests": ["test/env-admission.test.mjs"]
   },
   "deadlineMs": 2000,
   "termGraceMs": 100,

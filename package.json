@@ -12,6 +12,7 @@
     "qualify": "NODE_OPTIONS= \"$npm_node_execpath\" bin/mdlm-phase1-qualify.mjs qualify",
     "preflight": "NODE_OPTIONS= \"$npm_node_execpath\" bin/mdlm-phase1-qualify.mjs preflight",
     "controlled-case": "NODE_OPTIONS= \"$npm_node_execpath\" bin/mdlm-phase1-qualify.mjs controlled-case",
+    "admit-env": "NODE_OPTIONS= \"$npm_node_execpath\" bin/mdlm-phase1-qualify.mjs admit-env",
     "pilot": "NODE_OPTIONS= \"$npm_node_execpath\" bin/mdlm-phase1-qualify.mjs pilot",
     "generate-preflight": "NODE_OPTIONS= \"$npm_node_execpath\" tools/generate-preflight-inputs.mjs",
     "manifest": "NODE_OPTIONS= \"$npm_node_execpath\" tools/generate-manifest.mjs"

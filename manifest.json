@@ -43,20 +43,38 @@
       "profiles/calculator.json",
       "profiles/temperature.json",
       "profiles/controlled-calculator-candidate.json"
+    ],
+    "admissionSchemas": [
+      "schemas/composed-identity-v2.schema.json",
+      "schemas/env-admission-result-v2.schema.json"
+    ],
+    "admissionProfiles": [
+      "test/fixtures/admission/calculator-profile.json",
+      "test/fixtures/admission/temperature-profile.json"
+    ],
+    "admissionEnvironments": [
+      "test/fixtures/admission/calculator-env.json",
+      "test/fixtures/admission/temperature-env.json"
+    ],
+    "admissionControls": [
+      "test/fixtures/admission/controls.json"
+    ],
+    "admissionTests": [
+      "test/env-admission.test.mjs"
     ]
   },
   "assets": [
     {
       "path": "bin/mdlm-phase1-qualify.mjs",
       "mode": "100755",
-      "gitBlob": "2a74773b04dffd3dd082f09de8913a2438be920e",
-      "sha256": "0646fd45e31674f281fc234b940d1f93ce126871ef1049ffdfe826449c289b67"
+      "gitBlob": "af9340d1f80622504212fcb6322b71a9a39be685",
+      "sha256": "bf228c25548ba8b6127eaf398529399aa8060e537b08d752985da8a667914be1"
     },
     {
       "path": "config/qualification.json",
       "mode": "100644",
-      "gitBlob": "fa466057d6c72ec0c9c48c067cf82ae085355a0d",
-      "sha256": "1c35eda438bb43242a9fc503ff8abaf8020c85bb13e844e2cb37075b675b79d3"
+      "gitBlob": "cfd1819058ff21a66b60c60dc219b76c550356af",
+      "sha256": "9c05b481423d24e4769cc97d5bf95fbbfa9f1fe9eb108e518173dc2a2a9c6bcf"
     },
     {
       "path": "fixtures/calculator.mjs",
@@ -93,6 +111,12 @@
       "mode": "100644",
       "gitBlob": "26d2cd1298009ad4fadde1d252c791c2707ab480",
       "sha256": "c24f56b747815e2741aaad1af58ff86c85bfb52864502feae9d264bfd244b9a5"
+    },
+    {
+      "path": "lib/env-admission.mjs",
+      "mode": "100644",
+      "gitBlob": "b15a52d2b6c71edcd37f3df1880267ce4e0be742",
+      "sha256": "b3d06a8661f990205bd3b226791b15116054cd70d0ba7bc6b89f4bae0a782ff6"
     },
     {
       "path": "lib/evidence.mjs",
@@ -171,6 +195,54 @@
       "mode": "100644",
       "gitBlob": "5b906f2526708f87a59be3d59a56e3735ed73b9e",
       "sha256": "9cefa7c8b00d7c343ed1ed947a71d082aa109d24ae3aed1ac73df0bc6fcbd96c"
+    },
+    {
+      "path": "schemas/composed-identity-v2.schema.json",
+      "mode": "100644",
+      "gitBlob": "978bc4865fca4b44f7bb262297f327cc1d1803c7",
+      "sha256": "fe83399cd6ec8a53de04541eb5421a8d93fbc8948a5381cd196380f803cafd6c"
+    },
+    {
+      "path": "schemas/env-admission-result-v2.schema.json",
+      "mode": "100644",
+      "gitBlob": "f86095e7fdede9c358588d94adc656c2324c0082",
+      "sha256": "021210f0df552b9135c0f86ed5a8fb078b76047f38b49d375652d96bafc644ea"
+    },
+    {
+      "path": "test/env-admission.test.mjs",
+      "mode": "100644",
+      "gitBlob": "100c1e3a548f4f9b34a911e87a740059b2ea2905",
+      "sha256": "4e63be4f7d0be14c5430cd80ecc30e9f23d92d5b4ca074df6a2da6e827ac5cc6"
+    },
+    {
+      "path": "test/fixtures/admission/calculator-env.json",
+      "mode": "100644",
+      "gitBlob": "33209daf93ac3b4c524ee63a9000fdc15bb3d934",
+      "sha256": "1f47cc3c403fc22a2077f421eb540703d0cfae8f9a2da5362620d58d43f07e59"
+    },
+    {
+      "path": "test/fixtures/admission/calculator-profile.json",
+      "mode": "100644",
+      "gitBlob": "87bfd5cf0e618394cca21ba0ffa8818a04ec593c",
+      "sha256": "206e6e289f75848ba3c68874f9063cf95146e831625ea5586c50ed63e37058fa"
+    },
+    {
+      "path": "test/fixtures/admission/controls.json",
+      "mode": "100644",
+      "gitBlob": "47001b49766c9b77c37a3fbf42dbf04f0d9470c3",
+      "sha256": "fd89f7cd6e98e38c89a68890669b19b9bd665b509c26ba7060675a5ccf993c96"
+    },
+    {
+      "path": "test/fixtures/admission/temperature-env.json",
+      "mode": "100644",
+      "gitBlob": "33209daf93ac3b4c524ee63a9000fdc15bb3d934",
+      "sha256": "1f47cc3c403fc22a2077f421eb540703d0cfae8f9a2da5362620d58d43f07e59"
+    },
+    {
+      "path": "test/fixtures/admission/temperature-profile.json",
+      "mode": "100644",
+      "gitBlob": "87bfd5cf0e618394cca21ba0ffa8818a04ec593c",
+      "sha256": "206e6e289f75848ba3c68874f9063cf95146e831625ea5586c50ed63e37058fa"
     }
   ]
 }

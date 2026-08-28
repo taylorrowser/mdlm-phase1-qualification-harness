@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mdlm-phase1-env-admission-result@2",
+  "type": "object",
+  "required": [
+    "contract", "status", "admissionImplementation", "profileSha256", "envSha256",
+    "inventorySha256", "identitySha256", "applicableIdentityId", "derivedCapabilities",
+    "declaredCapabilities", "omittedCapabilities", "undeclaredCapabilities", "unknownInputKeys",
+    "qualifiedCapabilities", "rejectedCapabilities", "errors"
+  ],
+  "properties": {
+    "contract": { "const": "mdlm-phase1-env-admission-result@2" },
+    "status": { "enum": ["admitted", "rejected"] },
+    "admissionImplementation": { "enum": ["implemented", "not-implemented"] },
+    "profileSha256": { "$ref": "#/$defs/nullableSha256" },
+    "envSha256": { "$ref": "#/$defs/nullableSha256" },
+    "inventorySha256": { "$ref": "#/$defs/nullableSha256" },
+    "identitySha256": { "$ref": "#/$defs/nullableSha256" },
+    "applicableIdentityId": { "type": ["string", "null"] },
+    "derivedCapabilities": { "$ref": "#/$defs/strings" },
+    "declaredCapabilities": { "$ref": "#/$defs/strings" },
+    "omittedCapabilities": { "$ref": "#/$defs/strings" },
+    "undeclaredCapabilities": { "$ref": "#/$defs/strings" },
+    "unknownInputKeys": { "$ref": "#/$defs/strings" },
+    "qualifiedCapabilities": { "$ref": "#/$defs/strings" },
+    "rejectedCapabilities": { "type": "array" },
+    "errors": { "type": "array" }
+  },
+  "$defs": {
+    "nullableSha256": {
+      "anyOf": [
+        { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "strings": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+  }
+}

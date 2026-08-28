@@ -1,10 +1,11 @@
 # MDLM Phase 1 qualification harness
 
-This public Node 24 repository provides three separate operations:
+This public Node 24 repository provides four separate operations:
 
 - `qualify` checks the source-independent harness with synthetic fixtures, probes, and independent oracles. It never accepts a product repository.
 - `controlled-case` executes one typed request in a fresh private workspace.
 - `pilot` runs one public product entrypoint from an exact commit against the literal cases in a profile.
+- `admit-env` authenticates and evaluates one exact Phase 1 profile, ENV, capability inventory, and composed identity.
 
 The harness uses Node's standard library and Git. Child-process observations retain separate bounded stdout and stderr prefixes as base64, status, signal, deadline, truncation, and cleanup fields. On Linux, timeout handling signals the process group and known descendants with SIGTERM, then SIGKILL. `cleanupComplete: false` or incomplete child-close/stdout-end/stderr-end evidence makes a check fail. The runner does not claim that it can reap an unknown process that escaped before Linux `/proc` exposed it.
 
@@ -70,6 +71,19 @@ The request declares exact target repository, commit, tree, mode, blob, digest, 
 Entrypoint, stdin, and regular-file fixture bytes use canonical base64 and exact SHA-256 values. The execution profile bounds stdin, fixture sizes, aggregate fixture size, paths, output, stream drain, process cleanup, and time. It also declares the only environment variables sent to the child, including exact `LANG`, `LC_ALL`, and `TZ` values. The result records setup and post-execution metadata, raw streams, child close and stream-end evidence, stdin write and EOF evidence, process cleanup, workspace cleanup, truncation, completeness, and typed errors. Post-execution observation reads only retained `O_NOFOLLOW` descriptors with bounded `fstat` and descriptor reads; path checks reject replaced parents, leaves, and symlinks without reading through target-controlled paths.
 
 The harness rejects unsupported `filesystem-trace@1`, `filesystem-fault-injection@1`, `returned-byte-observation@1`, `network-denial@1`, `network-attempt-observation@1`, and `external-file-access-observation@1` requirements before workspace creation. It does not implement those controls.
+
+Evaluate one exact Phase 1 ENV claim:
+
+```sh
+env -u NODE_OPTIONS npm run admit-env -- \
+  --profile /tmp/canonical-product-profile.json \
+  --env /tmp/proposed-env.json \
+  --inventory /tmp/phase1-capability-inventory.json \
+  --identity /tmp/composed-identity-v2.json \
+  --output /tmp/env-admission-result.json
+```
+
+The command writes `mdlm-phase1-env-admission-result@2` atomically. It exits zero only when the result is `admitted`. Relative evidence paths resolve from the inventory file, and relative composed-identity paths resolve from the identity file. The identity input uses `schemaVersion: 2`; its exact tuple and every bound path digest must match one inventory identity. Evidence selectors support JSON Pointer and the inventory's ID-filter form, such as `$.controls[?(@.id=='P-CONTROL')]`.
 
 Run the public pilot profiles:
 

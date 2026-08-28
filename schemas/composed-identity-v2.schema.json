@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mdlm-phase1-composed-identity@2",
+  "type": "object",
+  "required": ["schemaVersion", "id", "mdlm", "runner", "processPackage", "tooling", "artifacts", "harness", "runtime"],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "id": { "type": "string", "minLength": 1 },
+    "mdlm": { "$ref": "#/$defs/gitIdentity" },
+    "runner": {
+      "allOf": [
+        { "$ref": "#/$defs/gitIdentity" },
+        { "$ref": "#/$defs/pathDigest" }
+      ]
+    },
+    "processPackage": {
+      "type": "object",
+      "required": ["name", "version", "digest"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "tooling": {
+      "type": "object",
+      "required": ["manifest", "manifestSha256", "lockfile", "lockfileSha256"],
+      "properties": {
+        "manifest": { "type": "string", "minLength": 1 },
+        "manifestSha256": { "$ref": "#/$defs/sha256" },
+        "lockfile": { "type": "string", "minLength": 1 },
+        "lockfileSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "required": ["manifest", "manifestSha256", "mdlmTarball", "mdlmTarballSha256", "mdlmPiTarball", "mdlmPiTarballSha256"],
+      "properties": {
+        "manifest": { "type": "string", "minLength": 1 },
+        "manifestSha256": { "$ref": "#/$defs/sha256" },
+        "mdlmTarball": { "type": "string", "minLength": 1 },
+        "mdlmTarballSha256": { "$ref": "#/$defs/sha256" },
+        "mdlmPiTarball": { "type": "string", "minLength": 1 },
+        "mdlmPiTarballSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "harness": {
+      "type": "object",
+      "required": ["commit", "tree", "qualificationManifest", "qualificationManifestSha256", "configurationSha256"],
+      "properties": {
+        "commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "tree": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "qualificationManifest": { "type": "string", "minLength": 1 },
+        "qualificationManifestSha256": { "$ref": "#/$defs/sha256" },
+        "configurationSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["executable", "executableSha256", "nodeVersion"],
+      "properties": {
+        "executable": { "type": "string", "minLength": 1 },
+        "executableSha256": { "$ref": "#/$defs/sha256" },
+        "nodeVersion": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "gitIdentity": {
+      "type": "object",
+      "required": ["commit", "tree"],
+      "properties": {
+        "commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "tree": { "type": "string", "pattern": "^[a-f0-9]{40}$" }
+      }
+    },
+    "pathDigest": {
+      "type": "object",
+      "required": ["executable", "executableSha256"],
+      "properties": {
+        "executable": { "type": "string", "minLength": 1 },
+        "executableSha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

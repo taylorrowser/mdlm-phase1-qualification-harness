@@ -1,0 +1,8 @@
+{
+  "capabilityInputs": {
+    "processContract": {},
+    "fixedIdentity": false,
+    "cleanupPolicy": 0,
+    "calculatorTemperatureOracle": []
+  }
+}
