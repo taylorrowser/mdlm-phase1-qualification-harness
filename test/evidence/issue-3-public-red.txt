@@ -1,0 +1,13 @@
+Node: v24.19.0
+
+Command: timeout --signal=TERM --kill-after=2s 15s env -u NODE_OPTIONS npm test
+Exit status: 124
+stdout bytes: 6376
+stderr bytes: 0
+
+Node's default test discovery launched
+test/fixtures/controlled-target.mjs without arguments. The target entered its
+observe path and waited for stdin until the public command timed out.
+
+The original release-preflight observation is preserved at:
+/home/ubuntu/git/mdlm-successor-demos/operations/integration/harness-f2820c92668794a174dc50d1b2928850c5429fd9-3beb6fcfa497c445f7e911bcdfcba4d686beff0b-757cab0050f94718eca37e2e241aebd7f079ff2a/preflight/20260827T233943Z/001-harness-test
