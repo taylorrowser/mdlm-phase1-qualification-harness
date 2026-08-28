@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mdlm-phase1-capability-controls@1",
+  "type": "object",
+  "required": [
+    "schema", "status", "evidenceIdentity", "identitySha256", "source",
+    "configurationSha256", "runtime", "capabilities", "controls", "errors"
+  ],
+  "properties": {
+    "schema": { "const": "mdlm-phase1-capability-controls@1" },
+    "status": { "enum": ["pass", "fail"] },
+    "evidenceIdentity": { "type": ["string", "null"] },
+    "identitySha256": { "type": ["string", "null"], "pattern": "^sha256:[a-f0-9]{64}$" },
+    "source": {
+      "type": ["object", "null"],
+      "properties": {
+        "commit": { "type": ["string", "null"] },
+        "tree": { "type": ["string", "null"] },
+        "manifestSha256": { "type": ["string", "null"] },
+        "manifestGitBlob": { "type": ["string", "null"] },
+        "clean": { "type": "boolean" }
+      }
+    },
+    "configurationSha256": { "type": ["string", "null"] },
+    "runtime": { "type": ["object", "null"] },
+    "capabilities": { "type": "array", "maxItems": 5 },
+    "controls": { "type": "array", "maxItems": 12 },
+    "errors": { "type": "array" }
+  }
+}

@@ -61,14 +61,48 @@
     ],
     "admissionTests": [
       "test/env-admission.test.mjs"
-    ]
+    ],
+    "capabilityControls": {
+      "runner": "bin/mdlm-phase1-qualify.mjs",
+      "launcher": "package.json",
+      "configuration": "config/capability-controls.json",
+      "fixtures": [
+        "fixtures/capability-control-target.mjs",
+        "fixtures/calculator.mjs",
+        "fixtures/temperature.mjs",
+        "fixtures/nonconforming.mjs"
+      ],
+      "oracles": [
+        "lib/oracles.mjs"
+      ],
+      "modules": [
+        "lib/assessment.mjs",
+        "lib/capability-controls.mjs",
+        "lib/composed-identity.mjs",
+        "lib/controlled-execution.mjs",
+        "lib/execution-identity.mjs",
+        "lib/process-runner.mjs"
+      ],
+      "schemas": [
+        "schemas/capability-controls-v1.schema.json"
+      ],
+      "tests": [
+        "test/capability-controls.test.mjs"
+      ]
+    }
   },
   "assets": [
     {
       "path": "bin/mdlm-phase1-qualify.mjs",
       "mode": "100755",
-      "gitBlob": "af9340d1f80622504212fcb6322b71a9a39be685",
-      "sha256": "bf228c25548ba8b6127eaf398529399aa8060e537b08d752985da8a667914be1"
+      "gitBlob": "9808dfdabfae62ddc6c7695a1fa8e8a4fefd5356",
+      "sha256": "b515e8644f7238e4bff5d5ed3965844ba9b184f774e03f29239eb9582be2ca8a"
+    },
+    {
+      "path": "config/capability-controls.json",
+      "mode": "100644",
+      "gitBlob": "af68e89208d793496fe387d0c7236431eb6d7b04",
+      "sha256": "15574b1bc587400525e67103205227125ca23b26bd99bdd8cf5e6ab0c9a8617b"
     },
     {
       "path": "config/qualification.json",
@@ -83,6 +117,12 @@
       "sha256": "0bf654931f0097c4a1311212a5901d662e3f3141da296b518d23e236055efe04"
     },
     {
+      "path": "fixtures/capability-control-target.mjs",
+      "mode": "100644",
+      "gitBlob": "3dcbba5e78656f26cdd7854e138bcb92f9a8ee51",
+      "sha256": "2c9efc686da537dbb83414e92b5af8e46431751b36e35b99050a6bf8ff4a6a58"
+    },
+    {
       "path": "fixtures/nonconforming.mjs",
       "mode": "100755",
       "gitBlob": "257f4600fb256086ddf07e3511fed4331b5fffe6",
@@ -95,16 +135,34 @@
       "sha256": "46d5b6e6b2cf7adaab47a02c5804db50ae8f66ef3d21ed45034f387655a26b56"
     },
     {
+      "path": "lib/assessment.mjs",
+      "mode": "100644",
+      "gitBlob": "7d1bd44c25a122bb499fe764f24e1c536d1833af",
+      "sha256": "250880c726e89024f5366c1f31ec1ea2c3501580519a1ff06af6c76a782cde13"
+    },
+    {
       "path": "lib/bindings.mjs",
       "mode": "100644",
       "gitBlob": "a5b2d227feedfd679cc55c153696032896c548bd",
       "sha256": "57cc6364ce7db8f06d549213f283e8ecc392179ad130cb52e6889835fac13029"
     },
     {
+      "path": "lib/capability-controls.mjs",
+      "mode": "100644",
+      "gitBlob": "d5c3f6aee6fba832e880d5ca81c2626e777309c6",
+      "sha256": "26a5cf3c202022dfd2b23c9a2a1c8668e9d7f107ebae10aafb5d1d9f82044608"
+    },
+    {
       "path": "lib/common.mjs",
       "mode": "100644",
       "gitBlob": "cdd6f46558ee5dbbefee803ad1eab43fb64f2c4c",
       "sha256": "c78ff084258549762065d958a8df5b02bcce2f9c042cfa227f92612ec9556f0a"
+    },
+    {
+      "path": "lib/composed-identity.mjs",
+      "mode": "100644",
+      "gitBlob": "03851dd537dbb71aff1cfc7b7578acf12c9b3fb0",
+      "sha256": "79e2425dec0972cf6577fcda548870fc0761e1bf395e6c40d91824013ade6421"
     },
     {
       "path": "lib/controlled-execution.mjs",
@@ -115,8 +173,8 @@
     {
       "path": "lib/env-admission.mjs",
       "mode": "100644",
-      "gitBlob": "8b993d0fe4158ab21494b47777a319afff2d2672",
-      "sha256": "9017ffc57d7a47435be29db051d9486e84e46062dae588e5102f20b2b3a7fb44"
+      "gitBlob": "e27bb1a6f28622203b1dd93f4d4afd19fcee7dad",
+      "sha256": "5303f80f63433c5eed048535be9d4069b6ff1cd7c08a7126c648e8c93b224434"
     },
     {
       "path": "lib/evidence.mjs",
@@ -127,8 +185,8 @@
     {
       "path": "lib/execution-identity.mjs",
       "mode": "100644",
-      "gitBlob": "f2481405c451936c279c97a3c511ffd7278126b4",
-      "sha256": "bb0fc2d6cf9e41c14973c68ce8a1d03fa77ea2adb763e8ea29bb7f7c54551a74"
+      "gitBlob": "a15b6762600f23504e7977cb1dd30685b7c7a8bf",
+      "sha256": "49000881fa340a2406ea4d3833dc27d48bea4b06f206786104a6a5c8713fdce3"
     },
     {
       "path": "lib/git-objects.mjs",
@@ -163,8 +221,14 @@
     {
       "path": "lib/qualify.mjs",
       "mode": "100644",
-      "gitBlob": "ad7cce5684a6d8a61e319c3f6713f02d675ea5e8",
-      "sha256": "3708ac861364fd70715001ce3d8cf893dca6a04b3af61391a5816371f34c9c2b"
+      "gitBlob": "5620237d012df42067292fed7765d67e42e102bc",
+      "sha256": "2e71f480f2bd7079814a2161047b1d92901bea11a23db100fe5f1e8ae19b6e5e"
+    },
+    {
+      "path": "package.json",
+      "mode": "100644",
+      "gitBlob": "24b895432de0b0673b40c0496fc5cc96a82f2ab7",
+      "sha256": "1b609ea54b53760ad618bbfe984e1b3fafefe5a68266882b16daa6fd8a89b3fd"
     },
     {
       "path": "probes/node24.mjs",
@@ -197,6 +261,12 @@
       "sha256": "9cefa7c8b00d7c343ed1ed947a71d082aa109d24ae3aed1ac73df0bc6fcbd96c"
     },
     {
+      "path": "schemas/capability-controls-v1.schema.json",
+      "mode": "100644",
+      "gitBlob": "78b3e833c48e30a7c4b35923f3f07aff427a7384",
+      "sha256": "168549561b48e2850ec6684153378e6c2b84e0e498ef01165da6570c53a0a96a"
+    },
+    {
       "path": "schemas/composed-identity-v2.schema.json",
       "mode": "100644",
       "gitBlob": "978bc4865fca4b44f7bb262297f327cc1d1803c7",
@@ -207,6 +277,12 @@
       "mode": "100644",
       "gitBlob": "f86095e7fdede9c358588d94adc656c2324c0082",
       "sha256": "021210f0df552b9135c0f86ed5a8fb078b76047f38b49d375652d96bafc644ea"
+    },
+    {
+      "path": "test/capability-controls.test.mjs",
+      "mode": "100644",
+      "gitBlob": "668bc6278f500ef64c70024030223f4ffc1a12f3",
+      "sha256": "7df66507fad844b7e0721697bfb6f12a4fd24f530b98f20ecd27bef9b56ac13f"
     },
     {
       "path": "test/env-admission.test.mjs",

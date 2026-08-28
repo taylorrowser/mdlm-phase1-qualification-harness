@@ -1,0 +1,93 @@
+{
+  "schema": "mdlm-phase1-capability-controls-config@1",
+  "assetRoot": "..",
+  "bindings": {
+    "runner": "bin/mdlm-phase1-qualify.mjs",
+    "launcher": "package.json",
+    "configuration": "config/capability-controls.json",
+    "fixtures": [
+      "fixtures/capability-control-target.mjs",
+      "fixtures/calculator.mjs",
+      "fixtures/temperature.mjs",
+      "fixtures/nonconforming.mjs"
+    ],
+    "oracles": ["lib/oracles.mjs"],
+    "modules": [
+      "lib/assessment.mjs",
+      "lib/capability-controls.mjs",
+      "lib/composed-identity.mjs",
+      "lib/controlled-execution.mjs",
+      "lib/execution-identity.mjs",
+      "lib/process-runner.mjs"
+    ],
+    "schemas": ["schemas/capability-controls-v1.schema.json"],
+    "tests": ["test/capability-controls.test.mjs"]
+  },
+  "capabilities": [
+    {
+      "id": "phase1.exact-role-bindings",
+      "positiveControlIds": ["P-ROLE-EXACT"],
+      "negativeControlIds": ["N-ROLE-MISMATCH"]
+    },
+    {
+      "id": "phase1.process-contract-oracle",
+      "positiveControlIds": ["P-PROCESS-EXACT"],
+      "negativeControlIds": ["N-PROCESS-MISMATCH"]
+    },
+    {
+      "id": "phase1.fixed-identity-authentication",
+      "positiveControlIds": ["P-IDENTITY-EXACT"],
+      "negativeControlIds": ["N-IDENTITY-DIGEST"]
+    },
+    {
+      "id": "phase1.deterministic-cleanup",
+      "positiveControlIds": ["P-CLEAN-COMPLETION"],
+      "negativeControlIds": ["N-CLEANUP-FAILURE"]
+    },
+    {
+      "id": "phase1.calculator-temperature-oracle",
+      "positiveControlIds": ["P-CALCULATOR-CORRECT", "P-TEMPERATURE-CORRECT"],
+      "negativeControlIds": ["N-CALCULATOR-WRONG", "N-TEMPERATURE-WRONG"]
+    }
+  ],
+  "process": {
+    "fixture": "fixtures/capability-control-target.mjs",
+    "positiveArgv": ["process-exact"],
+    "negativeArgv": ["process-wrong"],
+    "expected": {
+      "status": 17,
+      "stdoutBase64": "cHJvY2Vzcy1jb250cmFjdAo=",
+      "stderrBase64": ""
+    }
+  },
+  "cleanup": {
+    "target": "fixtures/capability-control-target.mjs",
+    "positiveArgv": ["clean"],
+    "negativeArgv": ["block-workspace"]
+  },
+  "products": [
+    {
+      "id": "calculator",
+      "fixture": "fixtures/calculator.mjs",
+      "negativeFixture": "fixtures/nonconforming.mjs",
+      "oracle": "calculator",
+      "argv": ["1", "+", "2"],
+      "positiveControlId": "P-CALCULATOR-CORRECT",
+      "negativeControlId": "N-CALCULATOR-WRONG"
+    },
+    {
+      "id": "temperature",
+      "fixture": "fixtures/temperature.mjs",
+      "negativeFixture": "fixtures/nonconforming.mjs",
+      "oracle": "temperature",
+      "argv": ["0", "C", "F"],
+      "positiveControlId": "P-TEMPERATURE-CORRECT",
+      "negativeControlId": "N-TEMPERATURE-WRONG"
+    }
+  ],
+  "limits": {
+    "deadlineMs": 2000,
+    "termGraceMs": 100,
+    "maxOutputBytes": 1048576
+  }
+}

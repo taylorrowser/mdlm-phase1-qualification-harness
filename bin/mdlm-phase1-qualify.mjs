@@ -4,6 +4,7 @@ import { lstat, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseOptions, readJson, requireSafeRelativePath } from '../lib/common.mjs';
+import { evaluateCapabilityControls } from '../lib/capability-controls.mjs';
 import { executeControlledCase } from '../lib/controlled-execution.mjs';
 import { writeEvidence } from '../lib/evidence.mjs';
 import { admitEnvironment } from '../lib/env-admission.mjs';
@@ -73,6 +74,18 @@ async function main(args) {
     if (!evidence.complete) process.exitCode = 1;
     return;
   }
+  if (command === 'capability-controls') {
+    const options = parseOptions(rest, ['--config', '--identity', '--identity-sha256', '--output']);
+    const evidence = await evaluateCapabilityControls({
+      config: options['--config'],
+      identity: options['--identity'],
+      identitySha256: options['--identity-sha256'],
+    });
+    await writeEvidence(options['--output'], evidence);
+    process.stdout.write(`${JSON.stringify({ ok: evidence.status === 'pass', output: options['--output'] })}\n`);
+    if (evidence.status !== 'pass') process.exitCode = 1;
+    return;
+  }
   if (command === 'admit-env') {
     const options = parseOptions(rest, ['--profile', '--env', '--inventory', '--identity', '--output']);
     const evidence = await admitEnvironment({
@@ -99,7 +112,7 @@ async function main(args) {
     }
     return;
   }
-  throw new Error(`usage: mdlm-phase1-qualify <self-check|preflight|qualify|controlled-case|admit-env|pilot>`);
+  throw new Error(`usage: mdlm-phase1-qualify <self-check|preflight|qualify|controlled-case|capability-controls|admit-env|pilot>`);
 }
 
 main(process.argv.slice(2)).catch((error) => {

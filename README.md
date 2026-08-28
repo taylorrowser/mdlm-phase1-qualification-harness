@@ -1,9 +1,10 @@
 # MDLM Phase 1 qualification harness
 
-This public Node 24 repository provides four separate operations:
+This public Node 24 repository provides six separate operations:
 
 - `qualify` checks the source-independent harness with synthetic fixtures, probes, and independent oracles. It never accepts a product repository.
 - `controlled-case` executes one typed request in a fresh private workspace.
+- `capability-controls` produces fresh, exact-composition evidence for the five calculator and temperature Phase 1 capabilities.
 - `pilot` runs one public product entrypoint from an exact commit against the literal cases in a profile.
 - `admit-env` authenticates and evaluates one exact Phase 1 profile, ENV, capability inventory, and composed identity.
 
@@ -71,6 +72,18 @@ The request declares exact target repository, commit, tree, mode, blob, digest, 
 Entrypoint, stdin, and regular-file fixture bytes use canonical base64 and exact SHA-256 values. The execution profile bounds stdin, fixture sizes, aggregate fixture size, paths, output, stream drain, process cleanup, and time. It also declares the only environment variables sent to the child, including exact `LANG`, `LC_ALL`, and `TZ` values. The result records setup and post-execution metadata, raw streams, child close and stream-end evidence, stdin write and EOF evidence, process cleanup, workspace cleanup, truncation, completeness, and typed errors. Post-execution observation reads only retained `O_NOFOLLOW` descriptors with bounded `fstat` and descriptor reads; path checks reject replaced parents, leaves, and symlinks without reading through target-controlled paths.
 
 The harness rejects unsupported `filesystem-trace@1`, `filesystem-fault-injection@1`, `returned-byte-observation@1`, `network-denial@1`, `network-attempt-observation@1`, and `external-file-access-observation@1` requirements before workspace creation. It does not implement those controls.
+
+Produce the source-owned capability controls separately from the unchanged 16-case qualification gate:
+
+```sh
+env -u NODE_OPTIONS npm run capability-controls -- \
+  --config config/capability-controls.json \
+  --identity /tmp/composed-identity-v2.json \
+  --identity-sha256 sha256:<64-hex-digest-of-identity-bytes> \
+  --output /tmp/capability-controls.json
+```
+
+The command writes `mdlm-phase1-capability-controls@1` atomically and exits zero only for `status: "pass"`. It authenticates the external identity digest before evaluating controls, then independently compares the executing harness commit, tree, qualification manifest, qualification configuration, runtime executable, runtime digest, and Node version. It rejects a dirty checkout and proves that the manifest, npm launcher, and every manifest asset match Git blobs in the reported tree. It separately binds the supplied controls configuration to its authenticated manifest asset. The result contains exactly five capability summaries and 12 controls. Summary `positiveControlIds` and `negativeControlIds` directly name records in `controls`.
 
 Evaluate one exact Phase 1 ENV claim:
 
