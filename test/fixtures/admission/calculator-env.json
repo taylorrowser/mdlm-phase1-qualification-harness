@@ -1,0 +1,15 @@
+{
+  "requiredCapabilities": [
+    "phase1.exact-role-bindings",
+    "phase1.process-contract-oracle",
+    "phase1.fixed-identity-authentication",
+    "phase1.deterministic-cleanup",
+    "phase1.calculator-temperature-oracle"
+  ],
+  "capabilityClaims": {
+    "processOracle": {},
+    "identityAuthenticator": false,
+    "cleanupController": 0,
+    "calculatorTemperatureOracle": []
+  }
+}
