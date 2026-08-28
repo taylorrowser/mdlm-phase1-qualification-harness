@@ -223,6 +223,13 @@ const rejectionCases = [
     mutate: ({ inventory }) => { inventory.applicableIdentities[0].mdlm.tree = '9'.repeat(40); },
   },
   {
+    name: 'malformed schema@2 Git identity', reason: 'invalid-identity-git-object',
+    mutate: ({ identity, inventory }) => {
+      identity.mdlm.commit = 'not-a-git-object';
+      inventory.applicableIdentities[0].mdlm.commit = identity.mdlm.commit;
+    },
+  },
+  {
     name: 'stale evidence digest', reason: 'stale-evidence-digest',
     mutate: ({ inventory }) => { inventory.evidenceCatalog[0].sha256 = `sha256:${'0'.repeat(64)}`; },
   },
@@ -245,6 +252,15 @@ const rejectionCases = [
   {
     name: 'historical control from another identity', rejectedReason: 'historical-control-identity',
     mutate: ({ inventory }) => { inventory.capabilities[0].positiveControls[0].evidenceIdentity = 'historical'; },
+  },
+  {
+    name: 'selected evidence that disagrees with its control', rejectedReason: 'evidence-control-mismatch',
+    mutate: ({ evidence, inventory }) => {
+      const document = JSON.parse(readFileSync(evidence, 'utf8'));
+      document.controls[0].observed = 'rejected';
+      writeJson(evidence, document);
+      inventory.evidenceCatalog[0].sha256 = sha256(evidence);
+    },
   },
   {
     name: 'empty rule target', reason: 'empty-rule-target',
