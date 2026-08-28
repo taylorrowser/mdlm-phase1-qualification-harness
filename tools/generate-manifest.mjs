@@ -6,9 +6,13 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const configuration = JSON.parse(await readFile(path.join(root, 'config/qualification.json'), 'utf8'));
+const capabilityControls = JSON.parse(await readFile(path.join(root, 'config/capability-controls.json'), 'utf8'));
 const support = [
+  'lib/assessment.mjs',
   'lib/bindings.mjs',
+  'lib/capability-controls.mjs',
   'lib/common.mjs',
+  'lib/composed-identity.mjs',
   'lib/controlled-execution.mjs',
   'lib/evidence.mjs',
   'lib/env-admission.mjs',
@@ -21,7 +25,8 @@ const support = [
   'lib/qualify.mjs',
 ];
 const bindingAssets = Object.values(configuration.bindings).flat();
-const paths = [...new Set([...bindingAssets, ...support])].sort();
+const controlBindingAssets = Object.values(capabilityControls.bindings).flat();
+const paths = [...new Set([...bindingAssets, ...controlBindingAssets, ...support])].sort();
 const assets = [];
 for (const assetPath of paths) {
   const bytes = await readFile(path.join(root, assetPath));
@@ -38,7 +43,7 @@ const manifest = {
   schemaVersion: 1,
   algorithm: { gitBlob: 'sha1', rawBytes: 'sha256' },
   capabilities: configuration.capabilities,
-  bindings: configuration.bindings,
+  bindings: { ...configuration.bindings, capabilityControls: capabilityControls.bindings },
   assets,
 };
 await writeFile(path.join(root, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
