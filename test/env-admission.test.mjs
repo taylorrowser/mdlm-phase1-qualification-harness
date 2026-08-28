@@ -21,6 +21,10 @@ function sha256(file) {
   return `sha256:${createHash('sha256').update(readFileSync(file)).digest('hex')}`;
 }
 
+function sha256Bytes(bytes) {
+  return `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
+}
+
 function control(id, evidenceIdentity) {
   return {
     id,
@@ -64,7 +68,10 @@ function makeFixture(product, mutate = () => {}) {
   };
   const evidenceSource = path.join(fixtureRoot, 'controls.json');
   const evidence = path.join(temporary, 'controls.json');
-  writeFileSync(evidence, readFileSync(evidenceSource, 'utf8').replaceAll('$COMPOSED_IDENTITY', identityId));
+  const identityBytes = `${JSON.stringify(identity, null, 2)}\n`;
+  writeFileSync(evidence, readFileSync(evidenceSource, 'utf8')
+    .replaceAll('$COMPOSED_IDENTITY', identityId)
+    .replaceAll('$IDENTITY_SHA256', sha256Bytes(identityBytes)));
   const controlsByCapability = {
     'phase1.exact-role-bindings': [['P-ROLE-EXACT'], ['N-ROLE-MISMATCH']],
     'phase1.process-contract-oracle': [['P-PROCESS-EXACT'], ['N-PROCESS-MISMATCH']],
@@ -263,10 +270,10 @@ const rejectionCases = [
     },
   },
   {
-    name: 'historical selected evidence relabeled by the inventory', rejectedReason: 'historical-control-identity',
+    name: 'historical selected evidence relabeled with the current identity ID', rejectedReason: 'historical-control-identity',
     mutate: ({ evidence, inventory }) => {
       const document = JSON.parse(readFileSync(evidence, 'utf8'));
-      document.controls[0].evidenceIdentity = 'historical';
+      document.controls[0].identitySha256 = `sha256:${'9'.repeat(64)}`;
       writeJson(evidence, document);
       inventory.evidenceCatalog[0].sha256 = sha256(evidence);
     },
